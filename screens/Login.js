@@ -1,22 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, SafeAreaView } from 'react-native';
+import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../src/config/firebaseConfig';
 
-export default function Login({ navigation }) {
+// Asegúrate de que esta ruta sea correcta para tu configuración de Firebase
+import { auth } from '../src/config/firebaseConfig'; 
+
+// Definición de Colores de la Imagen:
+const COLORS = {
+  primary: '#6A1B9A', // Púrpura Oscuro
+  secondary: '#4A148C', // Púrpura más oscuro para el botón
+  text: '#FFFFFF',
+  textSecondary: '#D0D0D0',
+  inputBackground: '#FFFFFF', // Lo usaremos como base, pero cambiaremos la opacidad/color en los estilos
+  googleRed: '#DB4437',
+  facebookBlue: '#4267B2',
+  forgotText: '#4A148C', // Morado oscuro para el texto de olvido
+};
+
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Función básica de validación de formato de email
   const validateEmail = (email) => {
     const regex = /\S+@\S+\.\S+/;
     return regex.test(email);
   };
 
+  // Función de inicio de sesión (Mantenemos la lógica Firebase)
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Por favor ingrese ambos campos.");
+      Alert.alert("Error", "Por favor ingrese su correo y contraseña.");
       return;
     }
 
@@ -27,131 +43,237 @@ export default function Login({ navigation }) {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert("Login exitoso", "Has iniciado sesión correctamente.");
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      navigation.replace('Home'); 
     } catch (error) {
       let errorMessage = "Hubo un problema al iniciar sesión.";
       switch (error.code) {
         case 'auth/invalid-email':
-          errorMessage = "El formato del correo electrónico no es válido.";
-          break;
         case 'auth/wrong-password':
-          errorMessage = "La contraseña es incorrecta.";
+          errorMessage = "Credenciales inválidas. Verifique su correo y contraseña.";
           break;
         case 'auth/user-not-found':
           errorMessage = "No se encontró un usuario con este correo.";
           break;
         case 'auth/network-request-failed':
-          errorMessage = "Error de conexión, por favor intenta más tarde.";
+          errorMessage = "Error de conexión. Verifique su internet.";
+          break;
+        default:
+          console.error(error);
+          errorMessage = "Error desconocido. Intente nuevamente.";
           break;
       }
       Alert.alert("Error", errorMessage);
     }
   };
 
+  // Funciones placeholder para botones sociales
+  const handleGoogleLogin = () => Alert.alert("Google", "Iniciar sesión con Google.");
+  const handleFacebookLogin = () => Alert.alert("Facebook", "Iniciar sesión con Facebook.");
+
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.primary }}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        
+        {/* Logo (Usamos la ruta probable y el estilo del nuevo diseño) */}
+        <View style={styles.logoContainer}>
+            <Image 
+              source={require('../assets/logo_andino.png')} 
+              style={styles.logo} 
+            />
+        </View>
 
-      <Text style={styles.label}>Ingrese Usuario</Text>
+        {/* --- Formulario --- */}
+        <Text style={styles.label}>Usuario o Correo Electrónico</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="andino@gmail.com"
+            placeholderTextColor="#888"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#aaa"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+        <Text style={styles.label}>Contraseña</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#888"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          {/* Ojo/Ocultar Contraseña */}
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.iconButton}>
+            <FontAwesome5 name={showPassword ? "eye-slash" : "eye"} size={20} color="#888" />
+          </TouchableOpacity>
+          {/* Lupa/Zoom (Placeholder funcionalmente) */}
+          <TouchableOpacity onPress={() => Alert.alert("Zoom", "Función de zoom/lupa.")} style={styles.iconButton}>
+            <FontAwesome5 name={"search-plus"} size={20} color="#888" />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor="#aaa"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <FontAwesome name={showPassword ? "eye-slash" : "eye"} size={20} color="#fff" />
+        {/* Texto "Olvidaste o bloqueaste" */}
+        <TouchableOpacity onPress={() => { /* navigation.navigate('Recover') */ }}>
+          <Text style={styles.forgotText}>Olvide o bloquie mi usuario y contraseña</Text>
         </TouchableOpacity>
-      </View>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Recover')}>
-        <Text style={styles.forgotText}>Olvidé o bloqueé mi usuario y contraseña</Text>
-      </TouchableOpacity>
+        {/* Botón Principal - Iniciar Sesión */}
+        <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin}>
+          <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Ingresar</Text>
-      </TouchableOpacity>
+        {/* --- Botones Sociales --- */}
+        <View style={styles.socialButtonsContainer}>
+            <TouchableOpacity style={styles.buttonGoogle} onPress={handleGoogleLogin}>
+              <FontAwesome name="google" size={20} color={COLORS.secondary} style={{ marginRight: 10 }} />
+              <Text style={styles.socialButtonTextGoogle}>Iniciar con Google</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-        <Text style={styles.signUpText}>¿No tienes cuenta aún? Regístrate</Text>
-      </TouchableOpacity>
-    </View>
+            <TouchableOpacity style={styles.buttonFacebook} onPress={handleFacebookLogin}>
+              <FontAwesome name="facebook" size={20} color={COLORS.text} style={{ marginRight: 10 }} />
+              <Text style={styles.socialButtonTextFacebook}>Iniciar con Facebook</Text>
+            </TouchableOpacity>
+        </View>
+
+
+        {/* Navegación a Registro */}
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={styles.signUpLink}>
+          <Text style={styles.signUpText}>¿No tienes cuenta? <Text style={styles.signUpLinkText}>Regístrate</Text></Text>
+        </TouchableOpacity>
+
+        {/* El "Made With Vercel/Logo footer" se ha eliminado de aquí. */}
+        
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    flexGrow: 1,
+    paddingHorizontal: 30,
+    paddingTop: 50,
+    backgroundColor: COLORS.primary, 
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#0B0B45', // azul marino de fondo
+  },
+  logoContainer: {
+    marginBottom: 50,
+    alignItems: 'center',
   },
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+    width: 150,
+    height: 150,
     resizeMode: 'contain',
   },
   label: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    width: '100%',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    // Nuevo fondo para suavizar el contraste
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
     borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
+    marginBottom: 20,
+    paddingHorizontal: 15,
     width: '100%',
+    height: 50,
+    // Borde suave para definir el cuadro sin que sea tosco
+    borderWidth: 1, 
+    borderColor: 'rgba(255, 255, 255, 0.4)', 
   },
   input: {
     flex: 1,
-    height: 45,
+    height: '100%',
     color: '#000',
-  },
-  button: {
-    backgroundColor: '#A7E3C2', // verde claro del mockup
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 8,
-    marginTop: 20,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#0B0B45',
     fontSize: 16,
-    fontWeight: 'bold',
+  },
+  iconButton: {
+      padding: 5,
+      marginLeft: 10,
   },
   forgotText: {
-    marginBottom: 15,
-    color: '#A7E3C2',
+    marginTop: 5,
+    color: COLORS.text, 
     fontSize: 14,
-    textAlign: 'center',
+    textDecorationLine: 'none',
+    alignSelf: 'flex-start',
+    marginBottom: 30,
+  },
+  buttonPrimary: {
+    backgroundColor: COLORS.secondary, 
+    paddingVertical: 14,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: COLORS.text, 
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  socialButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 40,
+  },
+  buttonGoogle: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Fondo más suave y texto púrpura para Google
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginRight: 10,
+    height: 50,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  buttonFacebook: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 10,
+    height: 50,
+  },
+  socialButtonTextGoogle: { // Estilo específico para Google (texto oscuro)
+    color: COLORS.secondary, 
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  socialButtonTextFacebook: { // Estilo específico para Facebook (texto claro)
+    color: COLORS.text, 
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  signUpLink: {
+    marginTop: 10,
   },
   signUpText: {
-    marginTop: 20,
-    color: '#A7E3C2',
-  },
+    color: COLORS.text,
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  signUpLinkText: {
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+  },
+  // Se elimina el estilo footerText ya que el elemento se eliminó del renderizado.
 });

@@ -1,38 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { onAuthStateChanged } from 'firebase/auth'; 
-import { auth } from './firebaseConfig';
-import Login from '../../screens/Login';
-import SignUp from '../../screens/SignUp';
-import Home from '../../screens/Home';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import SplashScreen from '../../screens/SplashScreen';
+import LoginScreen from '../../screens/Login';
+import SignUpScreen from '../../screens/SignUp';
+import TabNavigator from '../../navigation/TabNavigator'; 
 
 const Stack = createStackNavigator();
 
-function Navigation() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      if (user) {
-        setIsAuthenticated(true); 
-      } else {
-        setIsAuthenticated(false); 
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
+function AppNavigator() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={isAuthenticated ? "Home" : "Login"}>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="Home" component={Home} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" />
+        <NavigationContainer>
+          <Stack.Navigator 
+            screenOptions={{ headerShown: false }}
+            initialRouteName="Splash"
+          >
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Home" component={TabNavigator} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
-export default Navigation;
+export default AppNavigator;

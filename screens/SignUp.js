@@ -1,25 +1,69 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { auth } from '../src/config/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+// screens/SignUp.js
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
+import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
+import { auth, db } from "../src/config/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
+const COLORS = {
+  primary: "#6A1B9A",
+  secondary: "#4A148C",
+  text: "#FFFFFF",
+  textDark: "#000000",
+  textSecondary: "#666666",
+  inputBackground: "#6A1B9A",
+  error: "#FF0000",
+};
 
 export default function SignUp({ navigation }) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMatchError, setPasswordMatchError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    setPasswordMatchError(password && text && password !== text);
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setPasswordMatchError(confirmPassword && text !== confirmPassword);
+  };
+
   const handleSignUp = async () => {
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    setPasswordMatchError(false);
+
+    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Todos los campos son obligatorios.");
       return;
     }
 
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Ingrese un correo electrónico válido.");
+      return;
+    }
+
     if (password !== confirmPassword) {
+      setPasswordMatchError(true);
       Alert.alert("Error", "Las contraseñas no coinciden.");
       return;
     }
@@ -33,24 +77,45 @@ export default function SignUp({ navigation }) {
       return;
     }
 
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert("Registro exitoso", "Usuario registrado con éxito.");
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] }); 
+try {
+  // Registrar usuario con Firebase Auth
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  console.log("Usuario registrado:", userCredential);
+
+  // Obtener el usuario recién creado
+  const user = userCredential.user;
+  console.log("User ID:", user.uid, "Email:", user.email);
+
+  // Guardar perfil en Firestore (colección "perfiles")
+  await setDoc(doc(db, "perfiles", user.uid), {
+    uid: user.uid,
+    email: user.email,
+    username,
+    firstName,
+    lastName,
+    createdAt: new Date().toISOString(),
+  });
+
+  Alert.alert("Registro exitoso", "Usuario registrado con éxito. Por favor, inicie sesión.");
+      navigation.replace("Login");
     } catch (error) {
       let errorMessage = "Hubo un problema al registrar el usuario.";
       switch (error.code) {
-        case 'auth/email-already-in-use':
+        case "auth/email-already-in-use":
           errorMessage = "El correo electrónico ya está en uso.";
           break;
-        case 'auth/invalid-email':
+        case "auth/invalid-email":
           errorMessage = "El formato del correo electrónico no es válido.";
           break;
-        case 'auth/weak-password':
+        case "auth/weak-password":
           errorMessage = "La contraseña es demasiado débil.";
           break;
-        case 'auth/network-request-failed':
+        case "auth/network-request-failed":
           errorMessage = "Error de conexión, por favor intenta más tarde.";
+          break;
+        default:
+          console.error("Error de Firebase:", error);
+          errorMessage = "Error desconocido. Intente nuevamente.";
           break;
       }
       Alert.alert("Error", errorMessage);
@@ -58,153 +123,208 @@ export default function SignUp({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Regístrate</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.text }}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.logoContainer}>
+          <Image source={require("../assets/logo_andino.png")} style={styles.logo} />
+        </View>
 
-      <Text style={styles.label}>Nombre</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="user" size={20} color="#aaa" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su nombre"
-          placeholderTextColor="#aaa"
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-      </View>
+        <Text style={styles.title}>Crear Cuenta</Text>
 
-      <Text style={styles.label}>Apellido</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="user" size={20} color="#aaa" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su apellido"
-          placeholderTextColor="#aaa"
-          value={lastName}
-          onChangeText={setLastName}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <FontAwesome name="user" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre"
+            placeholderTextColor={COLORS.text}
+            value={firstName}
+            onChangeText={setFirstName}
+            autoCapitalize="words"
+          />
+        </View>
 
-      <Text style={styles.label}>Correo</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={20} color="#aaa" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su correo"
-          placeholderTextColor="#aaa"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <FontAwesome name="user" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Apellido"
+            placeholderTextColor={COLORS.text}
+            value={lastName}
+            onChangeText={setLastName}
+            autoCapitalize="words"
+          />
+        </View>
 
-      <Text style={styles.label}>Contraseña</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#aaa" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Ingrese su contraseña"
-          placeholderTextColor="#aaa"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <FontAwesome name={showPassword ? "eye-slash" : "eye"} size={20} color="#fff" />
+        <View style={styles.inputContainer}>
+          <FontAwesome name="tag" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre de Usuario"
+            placeholderTextColor={COLORS.text}
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <FontAwesome name="envelope" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor={COLORS.text}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <FontAwesome name="lock" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor={COLORS.text}
+            value={password}
+            onChangeText={handlePasswordChange}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.iconButton}>
+            <FontAwesome5 name={showPassword ? "eye-slash" : "eye"} size={20} color={COLORS.text} />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.passwordHint}>
+          La contraseña debe contener más de 6 caracteres, incluyendo mayúscula, minúscula y número.
+        </Text>
+
+        <View style={styles.inputContainer}>
+          <FontAwesome name="lock" size={20} color={COLORS.text} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Confirmar Contraseña"
+            placeholderTextColor={COLORS.text}
+            value={confirmPassword}
+            onChangeText={handleConfirmPasswordChange}
+            secureTextEntry={!showConfirmPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.iconButton}
+          >
+            <FontAwesome5
+              name={showConfirmPassword ? "eye-slash" : "eye"}
+              size={20}
+              color={COLORS.text}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {passwordMatchError && <Text style={styles.errorText}>Las contraseñas no coinciden.</Text>}
+
+        <TouchableOpacity style={styles.buttonPrimary} onPress={handleSignUp}>
+          <Text style={styles.buttonText}>REGISTRARSE</Text>
         </TouchableOpacity>
-      </View>
 
-      <Text style={styles.label}>Confirmar Contraseña</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#aaa" style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Confirme su contraseña"
-          placeholderTextColor="#aaa"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry={!showConfirmPassword}
-        />
-        <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-          <FontAwesome name={showConfirmPassword ? "eye-slash" : "eye"} size={20} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.navigate("Login")} style={styles.loginLink}>
+          <Text style={styles.loginText}>
+            ¿Ya tienes una cuenta? <Text style={styles.loginLinkText}>Iniciar Sesión</Text>
+          </Text>
         </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Registrarse</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.signUpText}>¿Ya tienes cuenta? Inicia sesión</Text>
-      </TouchableOpacity>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#0B0B45', // azul marino igual que Login
+    flexGrow: 1,
+    paddingHorizontal: 30,
+    paddingTop: 50,
+    backgroundColor: COLORS.text,
+    alignItems: "center",
+  },
+  logoContainer: {
+    marginBottom: 30,
+    alignItems: "center",
   },
   logo: {
     width: 120,
     height: 120,
-    marginBottom: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   title: {
+    color: COLORS.secondary,
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#fff',
-  },
-  label: {
-    alignSelf: 'flex-start',
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
+    fontWeight: "bold",
+    marginBottom: 30,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.inputBackground,
     borderRadius: 8,
     marginBottom: 15,
-    paddingHorizontal: 10,
-    width: '100%',
+    paddingHorizontal: 15,
+    width: "100%",
+    height: 50,
   },
   icon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    height: 45,
-    color: '#000',
+    height: "100%",
+    color: COLORS.text,
+    fontSize: 16,
   },
-  button: {
-    backgroundColor: '#A7E3C2', // verde claro igual que Login
-    paddingVertical: 12,
-    paddingHorizontal: 40,
+  iconButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  passwordHint: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    alignSelf: "flex-start",
+    width: "100%",
+    marginBottom: 10,
+    paddingLeft: 5,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 14,
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+    width: "100%",
+    marginBottom: 20,
+    paddingLeft: 5,
+  },
+  buttonPrimary: {
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 14,
     borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
     marginTop: 20,
-    width: '100%',
-    alignItems: 'center',
+    marginBottom: 20,
   },
   buttonText: {
-    color: '#0B0B45',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: "bold",
   },
-  signUpText: {
-    marginTop: 20,
-    color: '#A7E3C2',
-    textAlign: 'center',
+  loginLink: {
+    marginTop: 10,
+  },
+  loginText: {
+    color: COLORS.textDark,
+    fontSize: 15,
+    textAlign: "center",
+  },
+  loginLinkText: {
+    color: COLORS.secondary,
+    fontWeight: "bold",
+    textDecorationLine: "underline",
   },
 });

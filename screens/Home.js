@@ -1,60 +1,81 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
-import { signOut } from 'firebase/auth';
-import { auth } from '../src/config/firebaseConfig';
-
 export default function Home({ navigation }) {
+  const [userName, setUserName] = useState('Usuario');
+  const [userProfileLetter, setUserProfileLetter] = useState('A');
+  const [loading, setLoading] = useState(true);
 
-  const handleLogOut = async () => {
-    try {
-      await signOut(auth);  
-      Alert.alert("Sesión cerrada", "Has cerrado sesión correctamente.");
-      navigation.replace('Login');  
-    } catch (error) {
-      Alert.alert("Error", "Hubo un problema al cerrar sesión.");
-    }
-  };
+  // ... tu useEffect y demás funciones (igual que antes)
+
+  if (loading) {
+    return (
+      <View style={styles.page}>
+        <Text style={{ color: COLORS.secondary, fontSize: 18 }}>Cargando...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Bienvenido a la aplicación</Text>
-      <TouchableOpacity style={styles.button} onPress={handleLogOut}>
-        <Text style={styles.buttonText}>Cerrar sesión</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.page}>
+      {/* HEADER PERSONALIZADO */}
+      <View style={styles.header}>
+        {/* ... tu header */}
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* BARRA DE BÚSQUEDA */}
+        <View style={styles.searchBar}>
+          {/* ... search bar */}
+        </View>
+
+        {/* CUADRÍCULA DE BOTONES */}
+        <View style={styles.grid}>
+          {menuItems.map((item, index) => (
+            <GridButton key={index} item={item} onPress={handleGridPress} />
+          ))}
+        </View>
+
+        {/* BOTÓN PROVEEDORES */}
+        <TouchableOpacity style={styles.largeGreenButton} onPress={() => handleGridPress('Proveedores')}>
+          <Text style={styles.largeGreenButtonText}>Proveedores</Text>
+          <MaterialCommunityIcons name="truck-delivery-outline" size={24} color={COLORS.secondary} style={{marginLeft: 10}} />
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  // --- PAGE CON FLEXBOX ---
+  page: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start', // Comienza desde arriba
+    alignItems: 'center',         // Centrado horizontal
+    width: 390,
+    height: 844,
+    marginTop: 76,
+    backgroundColor: '#FFFFFF',
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#922b21',
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    borderRadius: 5,
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
+  // --- Resto de tus estilos ---
+  scrollContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+    width: '100%',
+  },
+
+  header: {
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    width: '100%',
+  },
+
+  // ... resto de tus estilos tal como los tenías
+});
