@@ -25,7 +25,11 @@ function AppNavigator() {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen name="Home" component={TabNavigator} />
+            <Stack.Screen 
+              name="Home" 
+              component={TabNavigator} 
+              initialParams={{ userId: null }} 
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

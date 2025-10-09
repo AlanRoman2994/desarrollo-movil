@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, SafeAreaView } from 'react-native';
 import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-
-// Asegúrate de que esta ruta sea correcta para tu configuración de Firebase
-import { auth } from '../src/config/firebaseConfig'; 
-
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { auth } from '../src/config/firebaseConfig';
 // Definición de Colores de la Imagen:
 const COLORS = {
   primary: '#6A1B9A', // Púrpura Oscuro
@@ -42,7 +40,9 @@ export default function LoginScreen({ navigation }) {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      let user=await signInWithEmailAndPassword(auth, email, password);
+      let userId=user.user.uid
+      await AsyncStorage.setItem('userId', userId);
       navigation.replace('Home'); 
     } catch (error) {
       let errorMessage = "Hubo un problema al iniciar sesión.";

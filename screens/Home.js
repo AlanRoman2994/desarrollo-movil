@@ -11,7 +11,7 @@ import {
   StatusBar,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -22,7 +22,8 @@ const COLORS = {
   gray: "#808080",
   black: "#000000",
 };
-
+import {doc,getDoc} from "firebase/firestore"
+import {db} from "../src/config/firebaseConfig"
 const screenWidth = Dimensions.get("window").width;
 const columnWidth = (screenWidth - 60) / 2;
 const ROW_MARGIN_BOTTOM = 15;
@@ -43,14 +44,23 @@ const SmallIconButton = ({ iconName, onPress }) => (
   </TouchableOpacity>
 );
 
-const Home = ({ navigation, userName = "Usuario" }) => {
-  const [userProfileLetter, setUserProfileLetter] = useState(userName[0].toUpperCase());
+const Home = ({ route,navigation }) => {
+  const [userProfileLetter, setUserProfileLetter] = useState("");
+  const [userName, setUserName] = useState("");
   const [syncTime] = useState("12:30hs");
 
+  let getUser=async()=>{
+  const storedUserId = await AsyncStorage.getItem('userId');
+  const userRef = doc(db, 'perfiles', storedUserId);
+  const userSnap = await getDoc(userRef);
+  const userData= userSnap.data()
+  setUserName(userData.firstName);
+}
+
   useEffect(() => {
-   
-    setUserProfileLetter(userName[0].toUpperCase());
-    console.log(userName);
+    getUser()
+    setUserProfileLetter(userName[0]);
+    ;
   }, [userName]);
 
   const handlePress = (action) => {
@@ -84,7 +94,7 @@ const Home = ({ navigation, userName = "Usuario" }) => {
 
           <View style={styles.welcomeRow}>
             <Text style={styles.welcomeText}>Bienvenido </Text>
-            <Text style={styles.userNameText}>Facu</Text>
+            <Text style={styles.userNameText}>{userName}</Text>
           </View>
 
           <View style={styles.syncRow}>
