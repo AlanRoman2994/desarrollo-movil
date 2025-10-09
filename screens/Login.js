@@ -29,6 +29,8 @@ export default function LoginScreen({ navigation }) {
 
   // Función de inicio de sesión (Mantenemos la lógica Firebase)
   const handleLogin = async () => {
+    
+    
     if (!email || !password) {
       Alert.alert("Error", "Por favor ingrese su correo y contraseña.");
       return;
@@ -41,13 +43,22 @@ export default function LoginScreen({ navigation }) {
 
     try {
       let user=await signInWithEmailAndPassword(auth, email, password);
+      
       let userId=user.user.uid
-      await AsyncStorage.setItem('userId', userId);
+      let response=await AsyncStorage.setItem('userId', userId);
+    
+      
       navigation.replace('Home'); 
     } catch (error) {
       let errorMessage = "Hubo un problema al iniciar sesión.";
+      
       switch (error.code) {
+        case 'auth/invalid-credential':
+          errorMessage = "Correo o password incorrecto";
+          break;
         case 'auth/invalid-email':
+          errorMessage = "Email inexistente.";
+          break;
         case 'auth/wrong-password':
           errorMessage = "Credenciales inválidas. Verifique su correo y contraseña.";
           break;
@@ -65,7 +76,8 @@ export default function LoginScreen({ navigation }) {
       Alert.alert("Error", errorMessage);
     }
   };
-
+ 
+ 
   // Funciones placeholder para botones sociales
   const handleGoogleLogin = () => Alert.alert("Google", "Iniciar sesión con Google.");
   const handleFacebookLogin = () => Alert.alert("Facebook", "Iniciar sesión con Facebook.");
