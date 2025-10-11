@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -9,11 +9,14 @@ import {
   SafeAreaView,
   Dimensions,
   StatusBar,
+  Animated,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../src/config/firebaseConfig";
+import Menu from "../screens/Menu"; // Importa tu componente Menu
 
 const COLORS = {
   primaryPurple: "#5A3D8A",
@@ -59,6 +62,8 @@ const Home = ({ navigation }) => {
   const [userProfileLetter, setUserProfileLetter] = useState("");
   const [userName, setUserName] = useState("");
   const [syncTime] = useState("12:30hs");
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const sidebarAnim = useRef(new Animated.Value(-screenWidth * 0.75)).current; // Sidebar ancho 75%
 
   const getUser = async () => {
     const storedUserId = await AsyncStorage.getItem('userId');
@@ -74,6 +79,33 @@ const Home = ({ navigation }) => {
     getUser();
     if (userName) setUserProfileLetter(userName[0]);
   }, [userName]);
+
+  const toggleSidebar = () => {
+    if (sidebarVisible) {
+      // Si ya está abierto, lo cerramos
+      Animated.timing(sidebarAnim, {
+        toValue: -screenWidth * 0.75,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setSidebarVisible(false));
+    } else {
+      // Si está cerrado, lo abrimos
+      setSidebarVisible(true);
+      Animated.timing(sidebarAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  const closeSidebar = () => {
+    Animated.timing(sidebarAnim, {
+      toValue: -screenWidth * 0.75,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => setSidebarVisible(false));
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -124,7 +156,6 @@ const Home = ({ navigation }) => {
 
         <View style={styles.gridWrapper}>
           <View style={styles.gridColumn}>
-            {/* Ahora navega a la pantalla 'Productos' */}
             <DashboardButton
               title="Productos"
               iconName="package-variant"
@@ -183,11 +214,21 @@ const Home = ({ navigation }) => {
           <MaterialCommunityIcons name="home-outline" size={24} color={COLORS.primaryPurple} />
           <Text style={styles.navTextActive}>Inicio</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => console.log("Menú")}>
+        <TouchableOpacity style={styles.navItem} onPress={toggleSidebar}>
           <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
           <Text style={styles.navTextInactive}>Menú</Text>
         </TouchableOpacity>
       </View>
+
+      {sidebarVisible && (
+        <TouchableWithoutFeedback onPress={closeSidebar}>
+          <View style={styles.overlay}>
+            <Animated.View style={[styles.sidebar, { left: sidebarAnim }]}>
+              <Menu closeSidebar={closeSidebar} />
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      )}
     </View>
   );
 };
@@ -224,4 +265,6 @@ const styles = StyleSheet.create({
   navItem: { alignItems: "center" },
   navTextActive: { color: COLORS.primaryPurple, fontSize: 12, fontWeight: "600", marginTop: 2 },
   navTextInactive: { color: COLORS.gray, fontSize: 12, marginTop: 2 },
+  overlay: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.5)" },
+  sidebar: { position: "absolute", top: 0, bottom: 0, width: screenWidth * 0.75, backgroundColor: COLORS.white, padding: 20 },
 });
