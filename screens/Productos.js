@@ -211,14 +211,15 @@ const Productos = ({ navigation }) => {
       </ScrollView>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Inicio")}>
-          <MaterialCommunityIcons name="home-outline" size={24} color={COLORS.primaryPurple} />
-          <Text style={styles.navTextActive}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Menu")}>
-          <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
-          <Text style={styles.navTextInactive}>Menú</Text>
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Agregar")}>
+          <MaterialCommunityIcons name="plus-circle-outline" size={28} color={COLORS.primaryPurple} />
+          <Text style={styles.navTextActive}>Producto</Text>
+          </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Eliminar")}>
+          <MaterialCommunityIcons name="minus-circle-outline" size={28} color={COLORS.gray} />
+          <Text style={styles.navTextInactive}>Productos</Text>
+          </TouchableOpacity>
       </View>
     </View>
   );
