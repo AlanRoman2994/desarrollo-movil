@@ -1,4 +1,4 @@
-import { collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy } from "firebase/firestore";
+import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // tu configuración de Firebase
 
 
@@ -103,9 +103,40 @@ async function getLowStockProducts(limitCount = 10, startAfterDoc = null) {
     return { products: [], lastDoc: null };
   }
 }
+
+const fetchLowStockCount = async () => {
+  try {
+    const q = query(collection(db, "products"), where("stock", "<=", 10));
+const querySnapshot = await getDocs(q);
+
+    return querySnapshot.size; // devuelve el número de documentos que cumplen la condición
+  } catch (error) {
+    console.error("Error al obtener productos con bajo stock:", error);
+    return 0;
+  }
+
+  }
+
+ const fetchUncheckedCount = async () => {
+  try {
+    // Solo documentos donde unchecked > 0
+    const q = query(collection(db, "products"), where("unchecked", ">", 0));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.docs.forEach(doc => {
+    });
+
+    return querySnapshot.size; // devuelve la cantidad de documentos
+  } catch (error) {
+    console.error("Error al obtener productos no revisados:", error);
+    return 0;
+  }
+};
 export{
   getAllProducts,
   getAvailableProducts,
   addProduct,
-  getLowStockProducts
+  getLowStockProducts,
+  fetchLowStockCount,
+  fetchUncheckedCount
 }

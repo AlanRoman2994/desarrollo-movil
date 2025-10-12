@@ -10,7 +10,7 @@ import {
   StatusBar,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { getAllProducts } from "../src/utils/models"; // tu función CRUD
+import { getAllProducts,fetchLowStockCount, fetchUncheckedCount } from "../src/utils/models"; // tu función CRUD
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -87,6 +87,8 @@ const Productos = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [lastVisible, setLastVisible] = useState(null);
   const [fetchingMore, setFetchingMore] = useState(false);
+  const [lowStockCount, setLowStockCount] = useState(0);
+const [uncheckedCount, setUncheckedCount] = useState(0);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -136,7 +138,24 @@ const Productos = ({ navigation }) => {
 
   useEffect(() => {
     fetchProducts();
+   const fetchSummaryCounts = async () => {
+    try {
+      const stock = await fetchLowStockCount();
+      const check = await fetchUncheckedCount();
+      console.log(check);
+      
+      setLowStockCount(stock);
+      setUncheckedCount(check);
+      
+    } catch (err) {
+      console.error("Error al obtener counts:", err);
+    }
+  };
+  
+  fetchSummaryCounts()
+ 
   }, []);
+
 
   const handleSearch = (text) => console.log("Buscando:", text);
   const handleFilterPress = () => console.log("Botón de filtro presionado");
@@ -183,22 +202,28 @@ const Productos = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.summaryCardsRow}>
-          <SummaryCard
-            title="Stock Bajo"
-            value="12"
-            unit="Artículos que requieren atención"
-            iconName="package-variant-alert"
-            color={COLORS.errorRed}
-          />
-          <SummaryCard
-            title="Artículos Recibidos"
-            value="48"
-            unit="En las últimas 24 horas"
-            iconName="download-box"
-            color={COLORS.primaryPurple}
-          />
-        </View>
+       <View style={styles.summaryCardsRow}>
+  <TouchableOpacity onPress={() => console.log("Ir a productos bajo stock")}>
+    <SummaryCard
+      title="Stock Bajo"
+      value={lowStockCount.toString()}
+      unit="Artículos que requieren atención"
+      iconName="package-variant-alert"
+      color={COLORS.errorRed}
+    />
+  </TouchableOpacity>
+
+  <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
+    <SummaryCard
+      title="Artículos Recibidos"
+      value={uncheckedCount.toString()}
+      unit="En las últimas 24 horas"
+      iconName="download-box"
+      color={COLORS.primaryPurple}
+    />
+  </TouchableOpacity>
+</View>
+
 
         <View style={styles.inventoryListCard}>
           <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
