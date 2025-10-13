@@ -9,6 +9,7 @@ import SplashScreen from '../../screens/SplashScreen';
 import LoginScreen from '../../screens/Login';
 import SignUpScreen from '../../screens/SignUp';
 import TabNavigator from '../../navigation/TabNavigator'; 
+import LowStockScreen from '../../screens/LowStockScreen';
 
 const Stack = createStackNavigator();
 
@@ -16,7 +17,11 @@ function AppNavigator() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle="dark-content"
+        />
         <NavigationContainer>
           <Stack.Navigator 
             screenOptions={{ headerShown: false }}
@@ -29,6 +34,11 @@ function AppNavigator() {
               name="Home" 
               component={TabNavigator} 
               initialParams={{ userId: null }} 
+            />
+            <Stack.Screen
+              name="LowStockScreen"
+              component={LowStockScreen}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         </NavigationContainer>

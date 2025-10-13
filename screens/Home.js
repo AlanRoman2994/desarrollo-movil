@@ -10,6 +10,7 @@ import {
   StatusBar,
   Animated,
   TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -94,38 +95,49 @@ const Home = ({ navigation }) => {
   return (
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
 
-      {/* HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
-        </TouchableOpacity>
+      {/* HEADER con SafeArea */}
+      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }}>
+        <View
+          style={[
+            styles.header,
+            { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 10 },
+          ]}
+        >
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
+          </TouchableOpacity>
 
-        <View style={styles.profileLetterContainer}>
-          <Text style={styles.profileText}>{userProfileLetter}</Text>
+          <View style={styles.profileLetterContainer}>
+            <Text style={styles.profileText}>{userProfileLetter}</Text>
+          </View>
+
+          <View style={styles.userInfo}>
+            <View style={styles.statusRow}>
+              <Text style={styles.accountStatus}>Cuenta Activa</Text>
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={12}
+                color={COLORS.white}
+                style={{ marginLeft: 4 }}
+              />
+            </View>
+
+            <View style={styles.welcomeRow}>
+              <Text style={styles.welcomeText}>Bienvenido </Text>
+              <Text style={styles.userNameText}>{userName}</Text>
+            </View>
+
+            <View style={styles.syncRow}>
+              <Text style={styles.syncText}>Última sincronización</Text>
+              <Text style={styles.syncTimeText}>{syncTime}</Text>
+            </View>
+          </View>
         </View>
+      </SafeAreaView>
 
-        <View style={styles.userInfo}>
-          <View style={styles.statusRow}>
-            <Text style={styles.accountStatus}>Cuenta Activa</Text>
-            <MaterialCommunityIcons name="check-circle" size={12} color={COLORS.white} style={{ marginLeft: 4 }} />
-          </View>
-
-          <View style={styles.welcomeRow}>
-            <Text style={styles.welcomeText}>Bienvenido </Text>
-            <Text style={styles.userNameText}>{userName}</Text>
-          </View>
-
-          <View style={styles.syncRow}>
-            <Text style={styles.syncText}>Última sincronización</Text>
-            <Text style={styles.syncTimeText}>{syncTime}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* GRILLA CENTRAL (solo 4 botones) */}
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      {/* GRILLA CENTRAL CENTRADA */}
+      <ScrollView contentContainerStyle={styles.scrollContainerCentered} showsVerticalScrollIndicator={false}>
         <View style={styles.gridWrapper}>
           <View style={styles.gridColumn}>
             <DashboardButton
@@ -161,7 +173,6 @@ const Home = ({ navigation }) => {
 
       {/* MENÚ INFERIOR */}
       <View style={styles.bottomNav}>
-        
         <TouchableOpacity style={styles.navItem} onPress={toggleSidebar}>
           <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
           <Text style={styles.navTextInactive}>Menú</Text>
@@ -186,15 +197,15 @@ export default Home;
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: COLORS.white },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.headerPurple,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    paddingTop: 10,
   },
-  backButton: { marginRight: 10, alignSelf: "flex-start", marginTop: 10 },
+  backButton: { marginRight: 10, alignSelf: "flex-start", marginTop: 0 },
   profileLetterContainer: {
     width: 60,
     height: 60,
@@ -215,24 +226,45 @@ const styles = StyleSheet.create({
   syncRow: { flexDirection: "row", justifyContent: "space-between", width: "100%" },
   syncText: { color: COLORS.white, fontSize: 12 },
   syncTimeText: { color: COLORS.white, fontSize: 14, fontWeight: "600" },
-  scrollContainer: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 },
-  gridWrapper: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
-  gridColumn: { width: columnWidth },
-  dashboardButton: {
-    width: "100%",
-    height: TALL_BUTTON_HEIGHT,
-    backgroundColor: COLORS.primaryPurple,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: ROW_MARGIN_BOTTOM,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+
+  // ✅ ScrollView centrado verticalmente
+  scrollContainerCentered: {
+    flexGrow: 1,
+    justifyContent: "center",   // centra verticalmente
+    alignItems: "center",       // centra horizontalmente
+    paddingHorizontal: 20,
+    paddingBottom: 100,         // espacio para bottomNav
+    paddingTop: 20,
   },
-  dashboardText: { color: COLORS.white, fontSize: 18, fontWeight: "600", marginTop: 8, textAlign: "center" },
+
+  gridWrapper: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
+  gridColumn: { 
+  width: columnWidth,
+  marginHorizontal: 5, // margen horizontal entre columnas
+},
+
+ dashboardButton: {
+  width: "100%",
+  height: TALL_BUTTON_HEIGHT,
+  backgroundColor: COLORS.primaryPurple,
+  borderRadius: 10,
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 25, // antes 15
+  shadowColor: COLORS.black,
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 5,
+},
+  dashboardText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 8,
+    textAlign: "center",
+  },
+
   bottomNav: {
     position: "absolute",
     bottom: 0,
@@ -249,6 +281,7 @@ const styles = StyleSheet.create({
   navItem: { alignItems: "center" },
   navTextActive: { color: COLORS.primaryPurple, fontSize: 12, fontWeight: "600", marginTop: 2 },
   navTextInactive: { color: COLORS.gray, fontSize: 12, marginTop: 2 },
+
   overlay: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.5)" },
   sidebar: { position: "absolute", top: 0, bottom: 0, width: screenWidth * 0.75, backgroundColor: COLORS.white, padding: 20 },
 });

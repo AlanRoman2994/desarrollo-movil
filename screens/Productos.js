@@ -8,6 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Platform
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAllProducts,fetchLowStockCount, fetchUncheckedCount } from "../src/utils/models"; // tu función CRUD
@@ -203,7 +204,7 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
         </View>
 
        <View style={styles.summaryCardsRow}>
-  <TouchableOpacity onPress={() => console.log("Ir a productos bajo stock")}>
+  <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
     <SummaryCard
       title="Stock Bajo"
       value={lowStockCount.toString()}
@@ -266,14 +267,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.headerPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
+ header: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  backgroundColor: COLORS.headerPurple,
+  paddingHorizontal: 20,
+  paddingVertical: 15,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+},
   backButton: {
     width: 40,
   },

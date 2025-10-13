@@ -1,6 +1,6 @@
 import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // tu configuración de Firebase
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -104,18 +104,30 @@ async function getLowStockProducts(limitCount = 10, startAfterDoc = null) {
   }
 }
 
-const fetchLowStockCount = async () => {
+ const fetchLowStockCount = async () => {
   try {
     const q = query(collection(db, "products"), where("stock", "<=", 10));
-const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(q);
 
-    return querySnapshot.size; // devuelve el número de documentos que cumplen la condición
+    // Obtenemos todos los productos
+    const lowStockProducts = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Guardamos en almacenamiento local
+    await AsyncStorage.setItem(
+      "lowStockProducts",
+      JSON.stringify(lowStockProducts)
+    );
+
+    // Devolvemos la cantidad
+    return lowStockProducts.length;
   } catch (error) {
     console.error("Error al obtener productos con bajo stock:", error);
     return 0;
   }
-
-  }
+};
 
  const fetchUncheckedCount = async () => {
   try {
