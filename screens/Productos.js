@@ -8,11 +8,10 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
+  Platform
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { doc, getDoc } from "firebase/firestore";
-
+import { getAllProducts,fetchLowStockCount, fetchUncheckedCount } from "../src/utils/models"; // tu función CRUD
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -50,17 +49,14 @@ const InventoryItem = ({ name, quantity, price, status }) => {
   switch (status) {
     case "low_stock":
       statusText = "Bajo Stock";
-      statusColor = COLORS.white;
       statusBackgroundColor = COLORS.errorRed;
       break;
     case "in_warehouse":
       statusText = "En Almacén";
-      statusColor = COLORS.white;
       statusBackgroundColor = COLORS.successGreen;
       break;
     case "no_stock":
       statusText = "Sin Stock";
-      statusColor = COLORS.white;
       statusBackgroundColor = COLORS.noStockBlack;
       break;
     default:
@@ -88,62 +84,83 @@ const InventoryItem = ({ name, quantity, price, status }) => {
 
 const Productos = ({ navigation }) => {
   const [userProfileLetter] = useState("A");
-  const inventoryData = [
-    {
-      id: 1,
-      name: "ACUARELA FILGO ESTUCHE 24 COLORES C/PINCEL",
-      quantity: 5,
-      price: "$$",
-      status: "low_stock",
-    },
-    {
-      id: 2,
-      name: "Paquetes de Cables Ethernet (CAT6)",
-      quantity: 10,
-      price: null,
-      status: "in_warehouse",
-    },
-    {
-      id: 3,
-      name: "Módulos GPS (Ublox M8N)",
-      quantity: 35,
-      price: null,
-      status: "in_warehouse",
-    },
-    {
-      id: 4,
-      name: "Baterías de Litio (18650)",
-      quantity: 0,
-      price: null,
-      status: "no_stock",
-    },
-    {
-      id: 5,
-      name: "Mouse Óptico Inalámbrico",
-      quantity: 22,
-      price: "$$",
-      status: "in_warehouse",
-    },
-    {
-      id: 6,
-      name: "Teclado Mecánico RGB",
-      quantity: 3,
-      price: "$$$",
-      status: "low_stock",
-    },
-  ];
+  const [inventoryData, setInventoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const [lowStockCount, setLowStockCount] = useState(0);
+const [uncheckedCount, setUncheckedCount] = useState(0);
 
-  const handleSearch = (text) => {
-    console.log("Buscando:", text);
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { products, lastVisible: lastDoc } = await getAllProducts();
+    const formatted = products.map(item => {
+      let status = "in_warehouse";
+      if (item.stock === 0) status = "no_stock";
+      else if (item.stock <= 10) status = "low_stock";
+
+      return {
+        id: item.id,
+        name: item.product_name,
+        quantity: item.stock,
+        price: item.unit_price ? `$${item.unit_price}` : null,
+        status,
+      };
+    });
+
+    setInventoryData(formatted);
+    setLastVisible(lastDoc);
+    setLoading(false);
   };
 
-  const handleFilterPress = () => {
-    console.log("Botón de filtro presionado");
+  const fetchMoreProducts = async () => {
+    if (!lastVisible || fetchingMore) return;
+    setFetchingMore(true);
+
+    const { products, lastVisible: lastDoc } = await getAllProducts(10, lastVisible);
+    const formatted = products.map(item => {
+      let status = "in_warehouse";
+      if (item.stock === 0) status = "no_stock";
+      else if (item.stock <= 10) status = "low_stock";
+
+      return {
+        id: item.id,
+        name: item.product_name,
+        quantity: item.stock,
+        price: item.unit_price ? `$${item.unit_price}` : null,
+        status,
+      };
+    });
+
+    setInventoryData(prev => [...prev, ...formatted]);
+    setLastVisible(lastDoc);
+    setFetchingMore(false);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+   const fetchSummaryCounts = async () => {
+    try {
+      const stock = await fetchLowStockCount();
+      const check = await fetchUncheckedCount();
+      console.log(check);
+      
+      setLowStockCount(stock);
+      setUncheckedCount(check);
+      
+    } catch (err) {
+      console.error("Error al obtener counts:", err);
+    }
   };
   
-  const handlePress = (action) => {
-    console.log(`Acción presionada: ${action}`);
-  };
+  fetchSummaryCounts()
+ 
+  }, []);
+
+
+  const handleSearch = (text) => console.log("Buscando:", text);
+  const handleFilterPress = () => console.log("Botón de filtro presionado");
+  const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
     <View style={styles.mainContainer}>
@@ -154,16 +171,23 @@ const Productos = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
         </TouchableOpacity>
-
         <Text style={styles.headerTitle}>Producto</Text>
-
         <View style={styles.profileLetterContainer}>
           <Text style={styles.profileText}>{userProfileLetter}</Text>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
+            fetchMoreProducts();
+          }
+        }}
+        scrollEventThrottle={400}
+      >
         <View style={styles.searchBarRow}>
           <View style={styles.searchBarContainer}>
             <MaterialCommunityIcons name="magnify" size={20} color={COLORS.gray} />
@@ -179,34 +203,43 @@ const Productos = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.summaryCardsRow}>
-          <SummaryCard
-            title="Stock Bajo"
-            value="12"
-            unit="Artículos que requieren atención"
-            iconName="package-variant-alert"
-            color={COLORS.errorRed}
-          />
-          <SummaryCard
-            title="Artículos Recibidos"
-            value="48"
-            unit="En las últimas 24 horas"
-            iconName="download-box"
-            color={COLORS.primaryPurple}
-          />
-        </View>
+       <View style={styles.summaryCardsRow}>
+  <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
+    <SummaryCard
+      title="Stock Bajo"
+      value={lowStockCount.toString()}
+      unit="Artículos que requieren atención"
+      iconName="package-variant-alert"
+      color={COLORS.errorRed}
+    />
+  </TouchableOpacity>
+
+  <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
+    <SummaryCard
+      title="Artículos Recibidos"
+      value={uncheckedCount.toString()}
+      unit="En las últimas 24 horas"
+      iconName="download-box"
+      color={COLORS.primaryPurple}
+    />
+  </TouchableOpacity>
+</View>
+
 
         <View style={styles.inventoryListCard}>
           <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
-          {inventoryData.map((item) => (
-            <InventoryItem
-              key={item.id}
-              name={item.name}
-              quantity={item.quantity}
-              price={item.price}
-              status={item.status}
-            />
-          ))}
+          {loading ? <Text>Cargando productos...</Text> :
+            inventoryData.map(item => (
+              <InventoryItem
+                key={item.id}
+                name={item.name}
+                quantity={item.quantity}
+                price={item.price}
+                status={item.status}
+              />
+            ))
+          }
+          {fetchingMore && <Text>Cargando más productos...</Text>}
         </View>
       </ScrollView>
 
@@ -214,12 +247,11 @@ const Productos = ({ navigation }) => {
         <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Agregar")}>
           <MaterialCommunityIcons name="plus-circle-outline" size={28} color={COLORS.primaryPurple} />
           <Text style={styles.navTextActive}>Producto</Text>
-          </TouchableOpacity>
-
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Eliminar")}>
           <MaterialCommunityIcons name="minus-circle-outline" size={28} color={COLORS.gray} />
           <Text style={styles.navTextInactive}>Productos</Text>
-          </TouchableOpacity>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -227,19 +259,23 @@ const Productos = ({ navigation }) => {
 
 export default Productos;
 
+// Mantener tu objeto styles igual que antes
+
+
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.headerPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
+ header: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  backgroundColor: COLORS.headerPurple,
+  paddingHorizontal: 20,
+  paddingVertical: 15,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+},
   backButton: {
     width: 40,
   },

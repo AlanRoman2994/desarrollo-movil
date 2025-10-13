@@ -2,12 +2,14 @@
   "name": "mobilestart",
   "license": "0BSD",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "seed": "node seed.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
