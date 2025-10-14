@@ -8,7 +8,9 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
-  Platform
+  Platform,
+  Modal,
+   KeyboardAvoidingView
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAllProducts,fetchLowStockCount, fetchUncheckedCount,searchRealTime } from "../src/utils/models"; // tu función CRUD
@@ -84,13 +86,7 @@ const InventoryItem = ({ id, name, quantity, price, status, onAddToOrder }) => {
         <View style={[styles.statusTag, { backgroundColor: statusBackgroundColor }]}>
           <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
         </View>
-        <TouchableOpacity 
-            style={[styles.addToOrderButton, { backgroundColor: pedidoButtonColor }]}
-            onPress={() => onAddToOrder({ id, name, quantity })}
-        >
-            <Text style={styles.addToOrderText}>Pedidos</Text>
-            <MaterialCommunityIcons name="plus-circle-outline" size={18} color={COLORS.white} />
-        </TouchableOpacity>
+      
       </View>
     </TouchableOpacity>
   );
@@ -105,6 +101,23 @@ const Productos = ({ navigation }) => {
   const [lowStockCount, setLowStockCount] = useState(0);
 const [uncheckedCount, setUncheckedCount] = useState(0);
 const [searchText, setSearchText] = useState("");
+const [modalVisible, setModalVisible] = useState(false);
+const [productName, setProductName] = useState("");
+const [brand, setBrand] = useState("");
+const [code, setCode] = useState("");
+const [listPrice, setListPrice] = useState("");
+const [unitPrice, setUnitPrice] = useState("");
+const [stock, setStock] = useState("");
+const [unchecked, setUnchecked] = useState("");
+const [newProduct, setNewProduct] = useState({
+  product_name: "",
+  brand: "",
+  code: "",
+  list_price: "",
+  unit_price: "",
+  stock: "",
+  unchecked: "",
+});
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -127,6 +140,35 @@ const [searchText, setSearchText] = useState("");
     setLastVisible(lastDoc);
     setLoading(false);
   };
+
+  const handleAddProduct = async () => {
+  try {
+    await addDoc(collection(db, "products"), {
+      product_name: productName,
+      brand,
+      code,
+      list_price: parseFloat(listPrice),
+      unit_price: parseFloat(unitPrice),
+      stock: parseInt(stock),
+      unchecked: parseInt(unchecked),
+    });
+
+    Alert.alert("✅ Producto agregado");
+    setModalVisible(false);
+
+    // Limpiar campos
+    setProductName("");
+    setBrand("");
+    setCode("");
+    setListPrice("");
+    setUnitPrice("");
+    setStock("");
+    setUnchecked("");
+  } catch (error) {
+    console.error("Error agregando producto:", error);
+  }
+};
+
 
   const fetchMoreProducts = async () => {
     if (!lastVisible || fetchingMore) return;
@@ -203,101 +245,179 @@ const handleSearch = async (text) => {
 
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
-  return (
-    <View style={styles.mainContainer}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
+return (
+  <View style={styles.mainContainer}>
+    <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
+    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Producto</Text>
-        <View style={styles.profileLetterContainer}>
-          <Text style={styles.profileText}>{userProfileLetter}</Text>
-        </View>
-      </View>
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-        onScroll={({ nativeEvent }) => {
-  const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-  if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
-    if (searchText === "") {
-      fetchMoreProducts(); // solo paginar si no hay búsqueda
-    }
-  }
-}}
-
-        scrollEventThrottle={400}
-      >
-        <View style={styles.searchBarRow}>
-          <View style={styles.searchBarContainer}>
-            <MaterialCommunityIcons name="magnify" size={20} color={COLORS.gray} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar productos..."
-              placeholderTextColor={COLORS.gray}
-              onChangeText={handleSearch}
-            />
-          </View>
-        </View>
-
-        <View style={styles.summaryCardsRow}>
-          <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
-            <SummaryCard
-              title="Stock Bajo"
-              value={lowStockCount.toString()}
-              unit="Artículos que requieren atención"
-              iconName="package-variant-alert"
-              color={COLORS.errorRed}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
-            <SummaryCard
-              title="Artículos Recibidos"
-              value={uncheckedCount.toString()}
-              unit="En las últimas 24 horas"
-              iconName="download-box"
-              color={COLORS.primaryPurple}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.inventoryListCard}>
-          <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
-          {loading ? <Text>Cargando productos...</Text> :
-            inventoryData.map(item => (
-              <InventoryItem
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                quantity={item.quantity}
-                price={item.price}
-                status={item.status}
-                onAddToOrder={handleAddToOrder}
-              />
-            ))
-          }
-          {fetchingMore && <Text>Cargando más productos...</Text>}
-        </View>
-      </ScrollView>
-
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Agregar")}>
-          <MaterialCommunityIcons name="plus-circle-outline" size={28} color={COLORS.primaryPurple} />
-          <Text style={styles.navTextActive}>Producto</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Eliminar")}>
-          <MaterialCommunityIcons name="minus-circle-outline" size={28} color={COLORS.gray} />
-          <Text style={styles.navTextInactive}>Productos</Text>
-        </TouchableOpacity>
+    {/* HEADER */}
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>Producto</Text>
+      <View style={styles.profileLetterContainer}>
+        <Text style={styles.profileText}>{userProfileLetter}</Text>
       </View>
     </View>
-  );
-};
+
+    {/* SCROLL PRINCIPAL */}
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      showsVerticalScrollIndicator={false}
+      onScroll={({ nativeEvent }) => {
+        const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+        if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
+          if (searchText === "") fetchMoreProducts(); // paginar si no hay búsqueda
+        }
+      }}
+      scrollEventThrottle={400}
+    >
+      {/* BARRA DE BUSQUEDA */}
+      <View style={styles.searchBarRow}>
+        <View style={styles.searchBarContainer}>
+          <MaterialCommunityIcons name="magnify" size={20} color={COLORS.gray} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar productos..."
+            placeholderTextColor={COLORS.gray}
+            onChangeText={handleSearch}
+          />
+        </View>
+      </View>
+
+      {/* SUMMARY CARDS */}
+      <View style={styles.summaryCardsRow}>
+        <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
+          <SummaryCard
+            title="Stock Bajo"
+            value={lowStockCount.toString()}
+            unit="Artículos que requieren atención"
+            iconName="package-variant-alert"
+            color={COLORS.errorRed}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("Unchecked_Stock")}>
+          <SummaryCard
+            title="Artículos Recibidos"
+            value={uncheckedCount.toString()}
+            unit="En las últimas 24 horas"
+            iconName="download-box"
+            color={COLORS.primaryPurple}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* INVENTARIO */}
+      <View style={styles.inventoryListCard}>
+        <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
+        {loading ? <Text>Cargando productos...</Text> :
+          inventoryData.map(item => (
+            <InventoryItem
+              key={item.id}
+              id={item.id}
+              name={item.name}
+              quantity={item.quantity}
+              price={item.price}
+              status={item.status}
+              onAddToOrder={handleAddToOrder}
+            />
+          ))
+        }
+        {fetchingMore && <Text>Cargando más productos...</Text>}
+      </View>
+    </ScrollView>
+
+    {/* BOTONES INFERIORES */}
+    <View style={styles.bottomNav}>
+      <TouchableOpacity style={styles.navItem} onPress={() => setModalVisible(true)}>
+        <MaterialCommunityIcons name="plus-circle-outline" size={28} color={COLORS.primaryPurple} />
+        <Text style={styles.navTextActive}>Producto</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.navItem} onPress={() => handlePress("Eliminar")}>
+        <MaterialCommunityIcons name="minus-circle-outline" size={28} color={COLORS.gray} />
+        <Text style={styles.navTextInactive}>Productos</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* MODAL AGREGAR PRODUCTO */}
+    <Modal
+      visible={modalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.modalOverlay}
+      >
+        <ScrollView contentContainerStyle={styles.modalWrapper}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Agregar Producto</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Nombre del producto"
+              value={newProduct.product_name}
+              onChangeText={text => setNewProduct({ ...newProduct, product_name: text })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Marca"
+              value={newProduct.brand}
+              onChangeText={text => setNewProduct({ ...newProduct, brand: text })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Código"
+              value={newProduct.code}
+              onChangeText={text => setNewProduct({ ...newProduct, code: text })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Precio lista"
+              keyboardType="numeric"
+              value={newProduct.list_price.toString()}
+              onChangeText={text => setNewProduct({ ...newProduct, list_price: parseFloat(text) })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Precio unidad"
+              keyboardType="numeric"
+              value={newProduct.unit_price.toString()}
+              onChangeText={text => setNewProduct({ ...newProduct, unit_price: parseFloat(text) })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Stock"
+              keyboardType="numeric"
+              value={newProduct.stock.toString()}
+              onChangeText={text => setNewProduct({ ...newProduct, stock: parseInt(text) })}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Unchecked"
+              keyboardType="numeric"
+              value={newProduct.unchecked.toString()}
+              onChangeText={text => setNewProduct({ ...newProduct, unchecked: parseInt(text) })}
+            />
+
+            <View style={styles.modalButtonsRow}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleAddProduct}>
+                <Text style={styles.modalButtonText}>Agregar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, { backgroundColor: COLORS.gray }]} onPress={() => setModalVisible(false)}>
+                <Text style={[styles.modalButtonText, { color: "#333" }]}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Modal>
+  </View>
+);
+}
 
 export default Productos;
 
@@ -485,19 +605,17 @@ summaryIconContainer: {
     fontSize: 14,
     marginRight: 5,
   },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderColor: COLORS.lightGray,
-    paddingVertical: 10,
-    backgroundColor: COLORS.white,
-    zIndex: 10,
-  },
+ bottomNav: {
+  flexDirection: "row",
+  justifyContent: "space-around", // mantiene los botones distribuidos horizontalmente
+  alignItems: "flex-start", // alinea los botones arriba dentro de la barra
+  height: 100, // aumenta la altura de la barra
+  paddingHorizontal: 20,
+  paddingTop: 10, // espacio desde arriba de la barra
+  backgroundColor: COLORS.white,
+  borderTopWidth: 1,
+  borderTopColor: COLORS.lightGray,
+},
   navItem: {
     alignItems: "center",
   },
@@ -512,4 +630,59 @@ summaryIconContainer: {
     fontSize: 12,
     marginTop: 2,
   },
+   modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.5)",
+},
+modalWrapper: {
+  flexGrow: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 20,
+},
+modalContainer: {
+  width: "90%",
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  padding: 20,
+  alignItems: "stretch",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: "bold",
+  marginBottom: 15,
+  textAlign: "center",
+},
+modalInput: {
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 8,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  marginBottom: 12,
+  fontSize: 16,
+},
+modalButtonsRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 10,
+},
+modalButton: {
+  flex: 1,
+  backgroundColor: "#5A3D8A",
+  borderRadius: 8,
+  paddingVertical: 12,
+  alignItems: "center",
+  marginHorizontal: 5,
+},
+modalButtonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+},
 });

@@ -128,16 +128,24 @@ async function getLowStockProducts(limitCount = 10, startAfterDoc = null) {
   }
 };
 
- const fetchUncheckedCount = async () => {
+const fetchUncheckedCount = async () => {
   try {
-    // Solo documentos donde unchecked > 0
     const q = query(collection(db, "products"), where("unchecked", ">", 0));
     const querySnapshot = await getDocs(q);
 
-    querySnapshot.docs.forEach(doc => {
-    });
+    const uncheckedProducts = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-    return querySnapshot.size; // devuelve la cantidad de documentos
+    // Guardamos en AsyncStorage con su propia clave
+    await AsyncStorage.setItem(
+      "uncheckedProducts",
+      JSON.stringify(uncheckedProducts)
+    );
+
+    // Retornamos la cantidad
+    return uncheckedProducts.length;
   } catch (error) {
     console.error("Error al obtener productos no revisados:", error);
     return 0;
