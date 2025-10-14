@@ -11,7 +11,8 @@ import {
   Platform
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { getAllProducts,fetchLowStockCount, fetchUncheckedCount } from "../src/utils/models"; // tu función CRUD
+import { getAllProducts,fetchLowStockCount, fetchUncheckedCount,searchRealTime } from "../src/utils/models"; // tu función CRUD
+
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -31,7 +32,7 @@ const COLORS = {
 const SummaryCard = ({ title, value, unit, iconName, color }) => (
   <View style={styles.summaryCard}>
     <View style={[styles.summaryIconContainer, { backgroundColor: color }]}>
-      <MaterialCommunityIcons name={iconName} size={24} color={COLORS.white} />
+      <MaterialCommunityIcons name={iconName} size={40} color={COLORS.white} />
     </View>
     <View style={styles.summaryTextContainer}>
       <Text style={styles.summaryValue}>{value}</Text>
@@ -90,6 +91,7 @@ const Productos = ({ navigation }) => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
 const [uncheckedCount, setUncheckedCount] = useState(0);
+const [searchText, setSearchText] = useState("");
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -158,8 +160,35 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
   }, []);
 
 
-  const handleSearch = (text) => console.log("Buscando:", text);
-  const handleFilterPress = () => console.log("Botón de filtro presionado");
+const handleSearch = async (text) => {
+  setSearchText(text); // guardamos el texto
+  setInventoryData([]); // limpiamos resultados anteriores
+
+  if (!text || text.trim() === "") {
+    fetchProducts(); // recarga todos si el texto está vacío
+    return;
+  }
+
+  const results = await searchRealTime(text);
+
+  const formatted = results.map(item => {
+    let status = "in_warehouse";
+    if (item.stock === 0) status = "no_stock";
+    else if (item.stock <= 10) status = "low_stock";
+
+    return {
+      id: item.id,
+      name: item.product_name,
+      quantity: item.stock,
+      price: item.unit_price ? `$${item.unit_price}` : null,
+      status,
+    };
+  });
+
+  setInventoryData(formatted); 
+};
+
+
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
@@ -181,11 +210,14 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
-            fetchMoreProducts();
-          }
-        }}
+  const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+  if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
+    if (searchText === "") {
+      fetchMoreProducts(); // solo paginar si no hay búsqueda
+    }
+  }
+}}
+
         scrollEventThrottle={400}
       >
         <View style={styles.searchBarRow}>
@@ -198,9 +230,6 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
               onChangeText={handleSearch}
             />
           </View>
-          <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
-            <MaterialCommunityIcons name="filter-variant" size={24} color={COLORS.primaryPurple} />
-          </TouchableOpacity>
         </View>
 
        <View style={styles.summaryCardsRow}>
@@ -231,7 +260,7 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
           {loading ? <Text>Cargando productos...</Text> :
             inventoryData.map(item => (
               <InventoryItem
-                key={item.id}
+                key={item.id +1}
                 name={item.name}
                 quantity={item.quantity}
                 price={item.price}
@@ -333,30 +362,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  summaryCardsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 10,
-  },
-  summaryCard: {
-    width: "48%",
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
+ summaryCardsRow: {
+  flexDirection: "row",
+  justifyContent: "space-evenly", // <-- reparte el espacio de forma equitativa
+  alignItems: "center",            // <-- centra verticalmente
+  marginVertical: 10,
+  gap: 15,                         // separa un poco sin deformar
+},
+
+ summaryCard: {
+  flex: 1,                     
+  aspectRatio: 1.1,             
+  backgroundColor: COLORS.white,
+  borderRadius: 12,
+  padding: 15,
+  justifyContent: "center",
+  alignItems: "center",
+  shadowColor: COLORS.black,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+summaryIconContainer: {
+  width: 50,                // tamaño del círculo o fondo
+  height: 40,
+  justifyContent: "center", // centra el ícono
+  alignItems: "center",
+  marginBottom: 10,         // separa el ícono del texto
+},
+
   summaryValue: {
     fontSize: 28,
     fontWeight: "bold",
