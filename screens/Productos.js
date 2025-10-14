@@ -11,7 +11,8 @@ import {
   Platform
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { getAllProducts,fetchLowStockCount, fetchUncheckedCount } from "../src/utils/models"; // tu función CRUD
+import { getAllProducts,fetchLowStockCount, fetchUncheckedCount,searchRealTime } from "../src/utils/models"; // tu función CRUD
+
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -26,12 +27,14 @@ const COLORS = {
   successGreen: "#4CAF50",
   noStockBlack: "#000000",
   cardBackground: "#F5F5F5",
+  pedidoButtonGreen: "#4CAF50", 
+  pedidoButtonGray: "#808080", 
 };
 
 const SummaryCard = ({ title, value, unit, iconName, color }) => (
   <View style={styles.summaryCard}>
     <View style={[styles.summaryIconContainer, { backgroundColor: color }]}>
-      <MaterialCommunityIcons name={iconName} size={24} color={COLORS.white} />
+      <MaterialCommunityIcons name={iconName} size={40} color={COLORS.white} />
     </View>
     <View style={styles.summaryTextContainer}>
       <Text style={styles.summaryValue}>{value}</Text>
@@ -41,7 +44,7 @@ const SummaryCard = ({ title, value, unit, iconName, color }) => (
   </View>
 );
 
-const InventoryItem = ({ name, quantity, price, status }) => {
+const InventoryItem = ({ id, name, quantity, price, status, onAddToOrder }) => {
   let statusText = "";
   let statusColor = COLORS.white;
   let statusBackgroundColor = COLORS.lightGray;
@@ -66,6 +69,10 @@ const InventoryItem = ({ name, quantity, price, status }) => {
       break;
   }
 
+  const pedidoButtonColor = status === "in_warehouse" 
+    ? COLORS.pedidoButtonGreen 
+    : COLORS.pedidoButtonGray;
+
   return (
     <TouchableOpacity style={styles.inventoryItemContainer}>
       <View style={styles.itemDetails}>
@@ -77,6 +84,13 @@ const InventoryItem = ({ name, quantity, price, status }) => {
         <View style={[styles.statusTag, { backgroundColor: statusBackgroundColor }]}>
           <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
         </View>
+        <TouchableOpacity 
+            style={[styles.addToOrderButton, { backgroundColor: pedidoButtonColor }]}
+            onPress={() => onAddToOrder({ id, name, quantity })}
+        >
+            <Text style={styles.addToOrderText}>Pedidos</Text>
+            <MaterialCommunityIcons name="plus-circle-outline" size={18} color={COLORS.white} />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -90,6 +104,7 @@ const Productos = ({ navigation }) => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
 const [uncheckedCount, setUncheckedCount] = useState(0);
+const [searchText, setSearchText] = useState("");
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -139,27 +154,53 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
 
   useEffect(() => {
     fetchProducts();
-   const fetchSummaryCounts = async () => {
-    try {
-      const stock = await fetchLowStockCount();
-      const check = await fetchUncheckedCount();
-      console.log(check);
-      
-      setLowStockCount(stock);
-      setUncheckedCount(check);
-      
-    } catch (err) {
-      console.error("Error al obtener counts:", err);
-    }
-  };
-  
-  fetchSummaryCounts()
- 
+    const fetchSummaryCounts = async () => {
+      try {
+        const stock = await fetchLowStockCount();
+        const check = await fetchUncheckedCount();
+        setLowStockCount(stock);
+        setUncheckedCount(check);
+      } catch (err) {
+        console.error("Error al obtener counts:", err);
+      }
+    };
+    fetchSummaryCounts();
   }, []);
 
+  const handleAddToOrder = (product) => {
+    console.log(`Producto añadido al pedido: ${product.name} (ID: ${product.id})`);
+    alert(`"${product.name}" ha sido añadido al pedido. (Simulación)`);
+  };
 
-  const handleSearch = (text) => console.log("Buscando:", text);
-  const handleFilterPress = () => console.log("Botón de filtro presionado");
+const handleSearch = async (text) => {
+  setSearchText(text); // guardamos el texto
+  setInventoryData([]); // limpiamos resultados anteriores
+
+  if (!text || text.trim() === "") {
+    fetchProducts(); // recarga todos si el texto está vacío
+    return;
+  }
+
+  const results = await searchRealTime(text);
+
+  const formatted = results.map(item => {
+    let status = "in_warehouse";
+    if (item.stock === 0) status = "no_stock";
+    else if (item.stock <= 10) status = "low_stock";
+
+    return {
+      id: item.id,
+      name: item.product_name,
+      quantity: item.stock,
+      price: item.unit_price ? `$${item.unit_price}` : null,
+      status,
+    };
+  });
+
+  setInventoryData(formatted); 
+};
+
+
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
@@ -181,11 +222,14 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
-            fetchMoreProducts();
-          }
-        }}
+  const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+  if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
+    if (searchText === "") {
+      fetchMoreProducts(); // solo paginar si no hay búsqueda
+    }
+  }
+}}
+
         scrollEventThrottle={400}
       >
         <View style={styles.searchBarRow}>
@@ -198,33 +242,29 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
               onChangeText={handleSearch}
             />
           </View>
-          <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
-            <MaterialCommunityIcons name="filter-variant" size={24} color={COLORS.primaryPurple} />
-          </TouchableOpacity>
         </View>
 
-       <View style={styles.summaryCardsRow}>
-  <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
-    <SummaryCard
-      title="Stock Bajo"
-      value={lowStockCount.toString()}
-      unit="Artículos que requieren atención"
-      iconName="package-variant-alert"
-      color={COLORS.errorRed}
-    />
-  </TouchableOpacity>
+        <View style={styles.summaryCardsRow}>
+          <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
+            <SummaryCard
+              title="Stock Bajo"
+              value={lowStockCount.toString()}
+              unit="Artículos que requieren atención"
+              iconName="package-variant-alert"
+              color={COLORS.errorRed}
+            />
+          </TouchableOpacity>
 
-  <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
-    <SummaryCard
-      title="Artículos Recibidos"
-      value={uncheckedCount.toString()}
-      unit="En las últimas 24 horas"
-      iconName="download-box"
-      color={COLORS.primaryPurple}
-    />
-  </TouchableOpacity>
-</View>
-
+          <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
+            <SummaryCard
+              title="Artículos Recibidos"
+              value={uncheckedCount.toString()}
+              unit="En las últimas 24 horas"
+              iconName="download-box"
+              color={COLORS.primaryPurple}
+            />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.inventoryListCard}>
           <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
@@ -232,10 +272,12 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
             inventoryData.map(item => (
               <InventoryItem
                 key={item.id}
+                id={item.id}
                 name={item.name}
                 quantity={item.quantity}
                 price={item.price}
                 status={item.status}
+                onAddToOrder={handleAddToOrder}
               />
             ))
           }
@@ -259,23 +301,20 @@ const [uncheckedCount, setUncheckedCount] = useState(0);
 
 export default Productos;
 
-// Mantener tu objeto styles igual que antes
-
-
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
- header: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  backgroundColor: COLORS.headerPurple,
-  paddingHorizontal: 20,
-  paddingVertical: 15,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
-},
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: COLORS.headerPurple,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  },
   backButton: {
     width: 40,
   },
@@ -333,30 +372,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  summaryCardsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 10,
-  },
-  summaryCard: {
-    width: "48%",
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
+ summaryCardsRow: {
+  flexDirection: "row",
+  justifyContent: "space-evenly", // <-- reparte el espacio de forma equitativa
+  alignItems: "center",            // <-- centra verticalmente
+  marginVertical: 10,
+  gap: 15,                         // separa un poco sin deformar
+},
+
+ summaryCard: {
+  flex: 1,                     
+  aspectRatio: 1.1,             
+  backgroundColor: COLORS.white,
+  borderRadius: 12,
+  padding: 15,
+  justifyContent: "center",
+  alignItems: "center",
+  shadowColor: COLORS.black,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+summaryIconContainer: {
+  width: 50,                // tamaño del círculo o fondo
+  height: 40,
+  justifyContent: "center", // centra el ícono
+  alignItems: "center",
+  marginBottom: 10,         // separa el ícono del texto
+},
+
   summaryValue: {
     fontSize: 28,
     fontWeight: "bold",
@@ -415,15 +460,30 @@ const styles = StyleSheet.create({
   },
   itemStatusWrapper: {
     marginLeft: 10,
+    alignItems: 'flex-end',
   },
   statusTag: {
     borderRadius: 5,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginBottom: 5,
   },
   statusText: {
     fontSize: 12,
     fontWeight: "bold",
+  },
+  addToOrderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  addToOrderText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginRight: 5,
   },
   bottomNav: {
     position: "absolute",

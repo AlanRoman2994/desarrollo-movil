@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Dimensions,
   StatusBar,
   Animated,
   TouchableWithoutFeedback,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,11 +27,6 @@ const COLORS = {
   black: "#000000",
 };
 
-const screenWidth = Dimensions.get("window").width;
-const columnWidth = (screenWidth - 60) / 2;
-const ROW_MARGIN_BOTTOM = 15;
-const TALL_BUTTON_HEIGHT = 130;
-
 const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
   <TouchableOpacity
     style={styles.dashboardButton}
@@ -46,11 +41,13 @@ const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
 );
 
 const Home = ({ navigation }) => {
+  const { width, height } = useWindowDimensions();
+  const isMobile = width < 600; // definición de móvil
   const [userProfileLetter, setUserProfileLetter] = useState("");
   const [userName, setUserName] = useState("");
   const [syncTime] = useState("12:30hs");
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const sidebarAnim = useRef(new Animated.Value(-screenWidth * 0.75)).current;
+  const sidebarAnim = useRef(new Animated.Value(-width * 0.75)).current;
 
   const getUser = async () => {
     const storedUserId = await AsyncStorage.getItem("userId");
@@ -64,13 +61,16 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     getUser();
+  }, []);
+
+  useEffect(() => {
     if (userName) setUserProfileLetter(userName[0]);
   }, [userName]);
 
   const toggleSidebar = () => {
     if (sidebarVisible) {
       Animated.timing(sidebarAnim, {
-        toValue: -screenWidth * 0.75,
+        toValue: -width * 0.75,
         duration: 300,
         useNativeDriver: false,
       }).start(() => setSidebarVisible(false));
@@ -86,7 +86,7 @@ const Home = ({ navigation }) => {
 
   const closeSidebar = () => {
     Animated.timing(sidebarAnim, {
-      toValue: -screenWidth * 0.75,
+      toValue: -width * 0.75,
       duration: 300,
       useNativeDriver: false,
     }).start(() => setSidebarVisible(false));
@@ -96,7 +96,7 @@ const Home = ({ navigation }) => {
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
 
-      {/* HEADER con SafeArea */}
+      {/* HEADER */}
       <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }}>
         <View
           style={[
@@ -136,10 +136,24 @@ const Home = ({ navigation }) => {
         </View>
       </SafeAreaView>
 
-      {/* GRILLA CENTRAL CENTRADA */}
-      <ScrollView contentContainerStyle={styles.scrollContainerCentered} showsVerticalScrollIndicator={false}>
-        <View style={styles.gridWrapper}>
-          <View style={styles.gridColumn}>
+      {/* GRILLA CENTRAL */}
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContainerCentered,
+          { paddingTop: height * 0.05 }, // padding proporcional
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          style={[
+            styles.gridWrapper,
+            {
+              flexDirection: isMobile ? "column" : "row",
+              maxWidth: isMobile ? "100%" : 600,
+            },
+          ]}
+        >
+          <View style={[styles.gridColumn, { marginRight: isMobile ? 0 : 10 }]}>
             <DashboardButton
               title="Productos"
               iconName="package-variant"
@@ -154,7 +168,7 @@ const Home = ({ navigation }) => {
             />
           </View>
 
-          <View style={styles.gridColumn}>
+          <View style={[styles.gridColumn, { marginRight: 0 }]}>
             <DashboardButton
               title="Pedidos"
               iconName="cart-outline"
@@ -172,12 +186,14 @@ const Home = ({ navigation }) => {
       </ScrollView>
 
       {/* MENÚ INFERIOR */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={toggleSidebar}>
-          <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
-          <Text style={styles.navTextInactive}>Menú</Text>
-        </TouchableOpacity>
-      </View>
+      {!sidebarVisible && (
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem} onPress={toggleSidebar}>
+            <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
+            <Text style={styles.navTextInactive}>Menú</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* SIDEBAR */}
       {sidebarVisible && (
@@ -197,77 +213,56 @@ export default Home;
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: COLORS.white },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.headerPurple,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  backButton: { marginRight: 10, alignSelf: "flex-start", marginTop: 0 },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 10 },
+  backButton: { marginRight: 10 },
   profileLetterContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.white,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
-    marginTop: 5,
+    marginRight: 10,
   },
-  profileText: { color: COLORS.primaryPurple, fontSize: 28, fontWeight: "bold" },
-  userInfo: { flex: 1, paddingTop: 10 },
-  statusRow: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
-  accountStatus: { color: COLORS.white, fontSize: 12 },
-  welcomeRow: { flexDirection: "row", alignItems: "baseline", marginBottom: 2 },
-  welcomeText: { color: COLORS.white, fontSize: 22, fontWeight: "bold" },
-  userNameText: { color: COLORS.white, fontSize: 22, fontWeight: "bold" },
-  syncRow: { flexDirection: "row", justifyContent: "space-between", width: "100%" },
+  profileText: { color: COLORS.primaryPurple, fontSize: 24, fontWeight: "bold" },
+  userInfo: { flex: 1 },
+  statusRow: { flexDirection: "row", alignItems: "center" },
+  accountStatus: { color: COLORS.white, fontSize: 12, fontWeight: "600" },
+  welcomeRow: { flexDirection: "row", alignItems: "center" },
+  welcomeText: { color: COLORS.white, fontSize: 14 },
+  userNameText: { color: COLORS.white, fontWeight: "bold", marginLeft: 4 },
+  syncRow: { flexDirection: "row", alignItems: "center" },
   syncText: { color: COLORS.white, fontSize: 12 },
-  syncTimeText: { color: COLORS.white, fontSize: 14, fontWeight: "600" },
+  syncTimeText: { color: COLORS.white, marginLeft: 4 },
 
-  // ✅ ScrollView centrado verticalmente
   scrollContainerCentered: {
+    marginTop:50,
+    padding: 20,
     flexGrow: 1,
-    justifyContent: "center",   // centra verticalmente
-    alignItems: "center",       // centra horizontalmente
-    paddingHorizontal: 20,
-    paddingBottom: 100,         // espacio para bottomNav
-    paddingTop: 20,
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
-
-  gridWrapper: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
-  gridColumn: { 
-  width: columnWidth,
-  marginHorizontal: 5, // margen horizontal entre columnas
-},
-
- dashboardButton: {
-  width: "100%",
-  height: TALL_BUTTON_HEIGHT,
-  backgroundColor: COLORS.primaryPurple,
-  borderRadius: 10,
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: 25, // antes 15
-  shadowColor: COLORS.black,
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 5,
-},
-  dashboardText: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 8,
-    textAlign: "center",
+  gridWrapper: {
+    justifyContent: "space-between",
+    width: "100%",
   },
+  gridColumn: {
+    flex: 1,
+    marginBottom: 15,
+  },
+  dashboardButton: {
+    backgroundColor: COLORS.primaryPurple,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dashboardText: { color: COLORS.white, fontSize: 16, marginTop: 10, fontWeight: "bold" },
 
   bottomNav: {
     position: "absolute",
-    bottom: 0,
+    bottom: 60,
     left: 0,
     right: 0,
     flexDirection: "row",
@@ -276,12 +271,29 @@ const styles = StyleSheet.create({
     borderColor: COLORS.lightGray,
     paddingVertical: 10,
     backgroundColor: COLORS.white,
-    zIndex: 10,
+    zIndex: 20,
+    elevation: 20,
   },
-  navItem: { alignItems: "center" },
-  navTextActive: { color: COLORS.primaryPurple, fontSize: 12, fontWeight: "600", marginTop: 2 },
+  navItem: { alignItems: "center", flex: 1 },
   navTextInactive: { color: COLORS.gray, fontSize: 12, marginTop: 2 },
 
-  overlay: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.5)" },
-  sidebar: { position: "absolute", top: 0, bottom: 0, width: screenWidth * 0.75, backgroundColor: COLORS.white, padding: 20 },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  sidebar: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: "75%",
+    backgroundColor: COLORS.white,
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 2, height: 0 },
+    elevation: 8,
+  },
 });

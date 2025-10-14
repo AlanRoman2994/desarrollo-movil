@@ -1,7 +1,6 @@
-import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy } from "firebase/firestore";
+import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy,startAt,endAt } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // tu configuración de Firebase
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 
  async function getAllProducts(limitCount = 10, startAfterDoc = null) {
@@ -144,11 +143,43 @@ async function getLowStockProducts(limitCount = 10, startAfterDoc = null) {
     return 0;
   }
 };
+
+
+async function searchRealTime(searchText) {
+  if (!searchText || searchText.trim() === "") return [];
+
+  const productsRef = collection(db, "products");
+  const searchLower = searchText.toLowerCase();
+
+  try {
+    // Traer todos los productos
+    const querySnapshot = await getDocs(productsRef);
+    const allProducts = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Filtrar localmente en memoria por los campos indicados
+    const filtered = allProducts.filter(item =>
+      (item.product_name && item.product_name.toLowerCase().includes(searchLower)) ||
+      (item.brand && item.brand.toLowerCase().includes(searchLower)) ||
+      (item.code && item.code.toLowerCase().includes(searchLower))
+    );
+
+    return filtered;
+  } catch (error) {
+    console.error("Error en searchRealTime:", error);
+    return [];
+  }
+}
+
+
 export{
   getAllProducts,
   getAvailableProducts,
   addProduct,
   getLowStockProducts,
   fetchLowStockCount,
-  fetchUncheckedCount
+  fetchUncheckedCount,
+  searchRealTime
 }
