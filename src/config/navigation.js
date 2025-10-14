@@ -10,6 +10,9 @@ import LoginScreen from '../../screens/Login';
 import SignUpScreen from '../../screens/SignUp';
 import TabNavigator from '../../navigation/TabNavigator'; 
 import LowStockScreen from '../../screens/LowStockScreen';
+import Documentos from '../../screens/Documentos';
+import Proveedores from '../../screens/Proveedores';
+import Pedidos from '../../screens/Pedidos';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +43,9 @@ function AppNavigator() {
               component={LowStockScreen}
               options={{ headerShown: false }}
             />
+            <Stack.Screen name="Pedidos" component={Pedidos} />
+            <Stack.Screen name="Proveedores" component={Proveedores} />
+            <Stack.Screen name="Documentos" component={Documentos} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

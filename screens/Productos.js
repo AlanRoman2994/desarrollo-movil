@@ -27,6 +27,8 @@ const COLORS = {
   successGreen: "#4CAF50",
   noStockBlack: "#000000",
   cardBackground: "#F5F5F5",
+  pedidoButtonGreen: "#4CAF50", 
+  pedidoButtonGray: "#808080", 
 };
 
 const SummaryCard = ({ title, value, unit, iconName, color }) => (
@@ -42,7 +44,7 @@ const SummaryCard = ({ title, value, unit, iconName, color }) => (
   </View>
 );
 
-const InventoryItem = ({ name, quantity, price, status }) => {
+const InventoryItem = ({ id, name, quantity, price, status, onAddToOrder }) => {
   let statusText = "";
   let statusColor = COLORS.white;
   let statusBackgroundColor = COLORS.lightGray;
@@ -67,6 +69,10 @@ const InventoryItem = ({ name, quantity, price, status }) => {
       break;
   }
 
+  const pedidoButtonColor = status === "in_warehouse" 
+    ? COLORS.pedidoButtonGreen 
+    : COLORS.pedidoButtonGray;
+
   return (
     <TouchableOpacity style={styles.inventoryItemContainer}>
       <View style={styles.itemDetails}>
@@ -78,6 +84,13 @@ const InventoryItem = ({ name, quantity, price, status }) => {
         <View style={[styles.statusTag, { backgroundColor: statusBackgroundColor }]}>
           <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
         </View>
+        <TouchableOpacity 
+            style={[styles.addToOrderButton, { backgroundColor: pedidoButtonColor }]}
+            onPress={() => onAddToOrder({ id, name, quantity })}
+        >
+            <Text style={styles.addToOrderText}>Pedidos</Text>
+            <MaterialCommunityIcons name="plus-circle-outline" size={18} color={COLORS.white} />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -141,24 +154,23 @@ const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     fetchProducts();
-   const fetchSummaryCounts = async () => {
-    try {
-      const stock = await fetchLowStockCount();
-      const check = await fetchUncheckedCount();
-      console.log(check);
-      
-      setLowStockCount(stock);
-      setUncheckedCount(check);
-      
-    } catch (err) {
-      console.error("Error al obtener counts:", err);
-    }
-  };
-  
-  fetchSummaryCounts()
- 
+    const fetchSummaryCounts = async () => {
+      try {
+        const stock = await fetchLowStockCount();
+        const check = await fetchUncheckedCount();
+        setLowStockCount(stock);
+        setUncheckedCount(check);
+      } catch (err) {
+        console.error("Error al obtener counts:", err);
+      }
+    };
+    fetchSummaryCounts();
   }, []);
 
+  const handleAddToOrder = (product) => {
+    console.log(`Producto añadido al pedido: ${product.name} (ID: ${product.id})`);
+    alert(`"${product.name}" ha sido añadido al pedido. (Simulación)`);
+  };
 
 const handleSearch = async (text) => {
   setSearchText(text); // guardamos el texto
@@ -232,39 +244,40 @@ const handleSearch = async (text) => {
           </View>
         </View>
 
-       <View style={styles.summaryCardsRow}>
-  <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
-    <SummaryCard
-      title="Stock Bajo"
-      value={lowStockCount.toString()}
-      unit="Artículos que requieren atención"
-      iconName="package-variant-alert"
-      color={COLORS.errorRed}
-    />
-  </TouchableOpacity>
+        <View style={styles.summaryCardsRow}>
+          <TouchableOpacity onPress={() => navigation.navigate("LowStockScreen")}>
+            <SummaryCard
+              title="Stock Bajo"
+              value={lowStockCount.toString()}
+              unit="Artículos que requieren atención"
+              iconName="package-variant-alert"
+              color={COLORS.errorRed}
+            />
+          </TouchableOpacity>
 
-  <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
-    <SummaryCard
-      title="Artículos Recibidos"
-      value={uncheckedCount.toString()}
-      unit="En las últimas 24 horas"
-      iconName="download-box"
-      color={COLORS.primaryPurple}
-    />
-  </TouchableOpacity>
-</View>
-
+          <TouchableOpacity onPress={() => console.log("Ir a productos no revisados")}>
+            <SummaryCard
+              title="Artículos Recibidos"
+              value={uncheckedCount.toString()}
+              unit="En las últimas 24 horas"
+              iconName="download-box"
+              color={COLORS.primaryPurple}
+            />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.inventoryListCard}>
           <Text style={styles.inventoryListTitle}>Artículos en Inventario</Text>
           {loading ? <Text>Cargando productos...</Text> :
             inventoryData.map(item => (
               <InventoryItem
-                key={item.id +1}
+                key={item.id}
+                id={item.id}
                 name={item.name}
                 quantity={item.quantity}
                 price={item.price}
                 status={item.status}
+                onAddToOrder={handleAddToOrder}
               />
             ))
           }
@@ -288,23 +301,20 @@ const handleSearch = async (text) => {
 
 export default Productos;
 
-// Mantener tu objeto styles igual que antes
-
-
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
- header: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  backgroundColor: COLORS.headerPurple,
-  paddingHorizontal: 20,
-  paddingVertical: 15,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
-},
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: COLORS.headerPurple,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  },
   backButton: {
     width: 40,
   },
@@ -450,15 +460,30 @@ summaryIconContainer: {
   },
   itemStatusWrapper: {
     marginLeft: 10,
+    alignItems: 'flex-end',
   },
   statusTag: {
     borderRadius: 5,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginBottom: 5,
   },
   statusText: {
     fontSize: 12,
     fontWeight: "bold",
+  },
+  addToOrderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  addToOrderText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginRight: 5,
   },
   bottomNav: {
     position: "absolute",
