@@ -1,4 +1,4 @@
-import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy,startAt,endAt } from "firebase/firestore";
+import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy,startAt,endAt,doc,deleteDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // tu configuración de Firebase
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -181,6 +181,18 @@ async function searchRealTime(searchText) {
   }
 }
 
+ const deleteProduct = async (productId) => {
+  if (!productId) throw new Error("Debe proporcionarse un productId");
+
+  try {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
+    console.log(`✅ Producto ${productId} eliminado correctamente`);
+  } catch (error) {
+    console.error("Error eliminando producto:", error);
+    throw error;
+  }
+};
 
 export{
   getAllProducts,
@@ -189,5 +201,6 @@ export{
   getLowStockProducts,
   fetchLowStockCount,
   fetchUncheckedCount,
-  searchRealTime
+  searchRealTime,
+  deleteProduct
 }
