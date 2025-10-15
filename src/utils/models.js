@@ -1,8 +1,10 @@
 import {  where,collection, getDocs, query, limit as limitFn, startAfter as startAfterFn, orderBy,startAt,endAt,doc,deleteDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // tu configuración de Firebase
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
+import { Alert } from "react-native";
  async function getAllProducts(limitCount = 10, startAfterDoc = null) {
   try {
     let q;
@@ -194,6 +196,109 @@ async function searchRealTime(searchText) {
   }
 };
 
+
+
+
+const generatePDF = async (type) => {
+  try {
+    let data = [];
+    let title = "";
+
+    // 🔹 1. Obtener datos desde Firebase
+    if (type === "Lista de Productos") {
+      title = "Lista de Productos";
+      const snapshot = await getDocs(collection(db, "products"));
+      data = snapshot.docs.map((doc) => ({
+        name: doc.data().product_name || "Sin nombre",
+        stock: doc.data().stock ?? 0,
+        price: doc.data().unit_price ?? 0,
+        brand: doc.data().brand || "",
+        code: doc.data().code || "",
+        unchecked: doc.data().unchecked ?? false,
+      }));
+    } else if (type === "Lista de Pedidos") {
+      title = "Lista de Pedidos";
+      const snapshot = await getDocs(collection(db, "orders"));
+
+      // Suponiendo que cada pedido tiene un array "items" con productos
+      data = snapshot.docs.flatMap((doc) =>
+        (doc.data().items || []).map((item) => ({
+          name: item.product_name || "Sin nombre",
+          stock: item.quantity ?? 0,
+          price: item.unit_price ?? 0,
+          brand: item.brand || "",
+          code: item.code || "",
+          unchecked: item.unchecked ?? false,
+        }))
+      );
+    }
+
+    // 🔹 2. Generar HTML dinámico con nuevas columnas
+    const htmlContent = `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+            h1 { text-align: center; color: #5A3D8A; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            th { background-color: #f4f4f4; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          <h1>${title}</h1>
+          <table>
+            <tr>
+              <th>Nombre</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Familia</th>
+              <th>Code</th>
+              <th>Sin revisar</th>
+            </tr>
+            ${data
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.stock}</td>
+                <td>$${item.price}</td>
+                <td>${item.brand}</td>
+                <td>${item.code}</td>
+                <td>${item.unchecked}</td>
+              </tr>`
+              )
+              .join("")}
+          </table>
+        </body>
+      </html>
+    `;
+
+    // 🔹 3. Generar PDF temporal
+    const { uri } = await Print.printToFileAsync({ html: htmlContent });
+
+    // 🔹 4. Guardar PDF permanentemente usando "base64"
+    const newPath = FileSystem.documentDirectory + `${title}.pdf`;
+    const fileData = await FileSystem.readAsStringAsync(uri, { encoding: "base64" });
+    await FileSystem.writeAsStringAsync(newPath, fileData, { encoding: "base64" });
+
+    // Borrar archivo temporal
+    await FileSystem.deleteAsync(uri);
+
+    // 🔹 5. Compartir PDF si es posible
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(newPath);
+    }
+
+    console.log("✅ PDF generado en:", newPath);
+    return newPath;
+  } catch (error) {
+    console.error("❌ Error generando PDF:", error);
+    throw error;
+  }
+};
 export{
   getAllProducts,
   getAvailableProducts,
@@ -202,5 +307,6 @@ export{
   fetchLowStockCount,
   fetchUncheckedCount,
   searchRealTime,
-  deleteProduct
+  deleteProduct,
+  generatePDF
 }
