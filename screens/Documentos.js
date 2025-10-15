@@ -11,7 +11,7 @@ import {
   Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { generatePDF } from "../src/utils/models";
 const COLORS = {
   primaryPurple: "#7F40BF",
   blueButton: "#1A5B8E",
@@ -24,13 +24,18 @@ const COLORS = {
 };
 
 const Documentos = ({ navigation }) => {
-  const handleDownload = (documentType) => {
-    console.log(`Generando documento: ${documentType}`);
-    Alert.alert(
-      "Documento generado",
-      `El documento "${documentType}" está siendo generado y descargado.`
-    );
-  };
+
+  const handleDownload = async (documentType) => {
+  try {
+    Alert.alert("Generando PDF...", `Creando ${documentType}...`);
+    await generatePDF(documentType);
+    Alert.alert("Éxito", `${documentType} generado y listo para compartir.`);
+  } catch (error) {
+    console.error("Error generando PDF:", error);
+    Alert.alert("Error", "No se pudo generar el documento.");
+  }
+};
+
 
   return (
     <View style={styles.container}>
