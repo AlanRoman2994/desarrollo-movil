@@ -48,9 +48,6 @@ const Documentos = ({ navigation }) => {
           <MaterialCommunityIcons name="arrow-left" size={28} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Documentos</Text>
-        <View style={styles.profileCircle}>
-          <Text style={styles.profileText}>A</Text>
-        </View>
       </View>
 
       {/* BODY */}
@@ -123,19 +120,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gray,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.primaryPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    color: COLORS.white,
-    fontWeight: "bold",
-  },
+  height: 60,
+  backgroundColor: COLORS.primaryPurple,
+  paddingHorizontal: 20,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  flexDirection: "row",
+  alignItems: "center",
+  position: "relative", // importante para el título absoluto
+},
+
+headerTitle: {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  textAlign: "center",
+  fontSize: 20,
+  color: COLORS.white,
+  fontWeight: "bold",
+  zIndex:-1, // para asegurarse de que esté detrás del botón de retroceso
+},
+
   profileCircle: {
     width: 40,
     height: 40,

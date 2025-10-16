@@ -103,10 +103,7 @@ const Home = ({ navigation }) => {
             styles.header,
             { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 10 },
           ]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
-          </TouchableOpacity>
+      >
 
           <View style={styles.profileLetterContainer}>
             <Text style={styles.profileText}>{userProfileLetter}</Text>

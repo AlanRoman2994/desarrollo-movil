@@ -171,7 +171,6 @@ const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: COLORS.white },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, paddingTop: Platform.OS === 'android' ? 10 : 0, backgroundColor: COLORS.headerPurple },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.white },
-  userIconContainer: { backgroundColor: COLORS.white, width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center' },
   userIconText: { color: COLORS.headerPurple, fontWeight: 'bold', fontSize: 18 },
   searchBarContainer: { paddingHorizontal: 15, paddingBottom: 15, backgroundColor: COLORS.headerPurple },
   searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 25, paddingHorizontal: 15, height: 50 },

@@ -1,22 +1,13 @@
 import React from 'react';
-import { Platform } from 'react-native';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  Dimensions,
-  useSafeAreaInsets
-} from 'react-native';
+import { Platform, StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusBar, Dimensions, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { auth } from '../src/config/firebaseConfig';
 
-// Obtenemos dimensiones de la pantalla
+import { signOut } from 'firebase/auth';
+
 const { width, height } = Dimensions.get('window');
 
-// Definición de colores
 const COLORS = {
   primaryPurple: '#5A3D8A',
   headerPurple: '#7A5AAB',
@@ -24,6 +15,7 @@ const COLORS = {
   lightGray: '#DDDDDD',
   gray: '#808080',
   black: '#000000',
+  red: '#E53935',
 };
 
 const MenuItem = ({ icon, text, onPress, showArrow = true, badge = null, isNew = false }) => (
@@ -52,11 +44,21 @@ const Sidebar = ({ navigation }) => {
     console.log(`Navegar a: ${item}`);
   };
 
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        navigation.replace("Login"); // Redirige a pantalla de login
+      })
+      .catch((error) => {
+        console.log("Error al cerrar sesión:", error);
+        Alert.alert("Error", "No se pudo cerrar sesión");
+      });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
 
-      {/* Contenedor principal */}
       <View style={styles.mainContainer}>
         {/* Encabezado */}
         <View style={styles.header}>
@@ -108,6 +110,11 @@ const Sidebar = ({ navigation }) => {
           <Text style={styles.sectionTitle}>LEGAL</Text>
           <MenuItem icon="file-document-outline" text="Términos y Condiciones" onPress={() => handlePress('Términos y Condiciones')} />
           <MenuItem icon="shield-outline" text="Política de Privacidad" onPress={() => handlePress('Política de Privacidad')} />
+
+          {/* BOTÓN CERRAR SESIÓN */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          </TouchableOpacity>
         </ScrollView>
 
         {/* Barra inferior */}
@@ -130,14 +137,8 @@ export default Sidebar;
 
 // =================== ESTILOS ===================
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.headerPurple,
-  },
-  mainContainer: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
+  safeArea: { flex: 1, backgroundColor: COLORS.headerPurple },
+  mainContainer: { flex: 1, backgroundColor: COLORS.white },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,15 +147,8 @@ const styles = StyleSheet.create({
     paddingVertical: height * 0.02,
     minHeight: height * 0.14,
   },
-  backButton: {
-    paddingRight: 15,
-    alignSelf: 'flex-start',
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
+  backButton: { paddingRight: 15, alignSelf: 'flex-start' },
+  profileInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   profileLetterContainer: {
     width: width * 0.12,
     height: width * 0.12,
@@ -164,11 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: width * 0.03,
   },
-  profileText: {
-    color: COLORS.primaryPurple,
-    fontSize: width * 0.06,
-    fontWeight: 'bold',
-  },
+  profileText: { color: COLORS.primaryPurple, fontSize: width * 0.06, fontWeight: 'bold' },
   userInfo: { flex: 1 },
   accountStatus: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
   accountStatusText: { color: COLORS.primaryPurple, fontSize: width * 0.03 },
@@ -176,67 +166,19 @@ const styles = StyleSheet.create({
   userName: { fontWeight: 'bold' },
   lastSyncText: { color: COLORS.primaryPurple, fontSize: width * 0.03 },
   lastSyncTime: { color: COLORS.white },
-  scrollContainer: {
-    paddingHorizontal: width * 0.05,
-    paddingBottom: height * 0.12,
-    paddingTop: height * 0.01,
-  },
-  sectionTitle: {
-    fontSize: width * 0.03,
-    color: COLORS.primaryPurple,
-    fontWeight: 'bold',
-    marginTop: height * 0.025,
-    marginBottom: height * 0.01,
-    textTransform: 'uppercase',
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: height * 0.02,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
-  },
-  menuItemText: {
-    flex: 1,
-    fontSize: width * 0.04,
-    marginLeft: width * 0.03,
-    color: COLORS.black,
-  },
-  badgeContainer: {
-    backgroundColor: COLORS.headerPurple,
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
+  scrollContainer: { paddingHorizontal: width * 0.05, paddingBottom: height * 0.12, paddingTop: height * 0.01 },
+  sectionTitle: { fontSize: width * 0.03, color: COLORS.primaryPurple, fontWeight: 'bold', marginTop: height * 0.025, marginBottom: height * 0.01, textTransform: 'uppercase' },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: height * 0.02, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
+  menuItemText: { flex: 1, fontSize: width * 0.04, marginLeft: width * 0.03, color: COLORS.black },
+  badgeContainer: { backgroundColor: COLORS.headerPurple, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   badgeText: { color: COLORS.white, fontSize: 12, fontWeight: 'bold' },
-  newTag: {
-    backgroundColor: COLORS.headerPurple,
-    borderRadius: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginRight: 10,
-  },
+  newTag: { backgroundColor: COLORS.headerPurple, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginRight: 10 },
   newTagText: { color: COLORS.white, fontSize: 10, fontWeight: 'bold' },
-
+  logoutButton: { marginTop: 30, paddingVertical: 12, paddingHorizontal: 15, backgroundColor: COLORS.red, borderRadius: 8, alignItems: 'center' },
+  logoutText: { color: COLORS.white, fontSize: width * 0.04, fontWeight: 'bold' },
   navItem: { alignItems: 'center', flex: 1 },
   navTextActive: { color: COLORS.primaryPurple, fontSize: width * 0.03, fontWeight: '600', marginTop: 2 },
   navTextInactive: { color: COLORS.gray, fontSize: width * 0.03, marginTop: 2 },
-
-bottomNav: {
-  position: 'absolute',
-  bottom: 0, 
-  left: 0,
-  right: 0,
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  borderTopWidth: 1,
-  borderColor: COLORS.lightGray,
-  paddingVertical: height * 0.02,
-  backgroundColor: COLORS.white,
-  zIndex: 20,
-  
-}
+  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderColor: COLORS.lightGray, paddingVertical: height * 0.02, backgroundColor: COLORS.white, zIndex: 20 }
 });
+

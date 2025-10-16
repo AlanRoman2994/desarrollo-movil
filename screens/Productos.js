@@ -303,9 +303,6 @@ const Productos = ({ navigation }) => {
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Producto</Text>
-        <View style={styles.profileLetterContainer}>
-          <Text style={styles.profileText}>{userProfileLetter}</Text>
-        </View>
       </View>
 
       {/* SCROLL PRINCIPAL */}
@@ -518,22 +515,28 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.headerPurple,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
-  },
-  backButton: {
-    width: 40,
-  },
-  headerTitle: {
-    color: COLORS.white,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
+  height: 60,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: COLORS.headerPurple,
+  paddingHorizontal: 20,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+},
+
+backButton: {
+  position: "absolute",
+  left: 20,
+  top: "50%",
+  transform: [{ translateY: -12 }], // ajusta según el tamaño del icono
+},
+
+headerTitle: {
+  color: COLORS.white,
+  fontSize: 20,
+  fontWeight: "bold",
+  textAlign: "center",
+},
+
   profileLetterContainer: {
     width: 40,
     height: 40,
