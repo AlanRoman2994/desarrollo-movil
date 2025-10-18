@@ -6,12 +6,11 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -59,9 +58,9 @@ const Proveedores = ({ navigation }) => {
   );
 
   return (
+    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple, flex:1 }} >
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -107,6 +106,7 @@ const Proveedores = ({ navigation }) => {
         <MaterialCommunityIcons name="plus" size={28} color={COLORS.white} />
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 };
 
@@ -117,23 +117,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  header: {
-  height: 60,
-  justifyContent: "center",
-  alignItems: "center",
-  backgroundColor: COLORS.headerPurple,
+ header: {
+  height: 60, 
+  flexDirection: "row", 
+  alignItems: "center", // centra verticalmente todos los hijos
+  justifyContent: "space-between", // separa los elementos a los extremos
   paddingHorizontal: 20,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  backgroundColor: COLORS.headerPurple,
 },
 
 backButton: {
   position: "absolute",
   left: 20,
   top: "50%",
-  transform: [{ translateY: -12 }], // ajusta según el tamaño del icono
+  transform: [{ translateY: -12 }],
+  zIndex: 10, // 👈 hace que quede arriba del headerTitle
 },
-
 headerTitle: {
+  flex: 1,
   color: COLORS.white,
   fontSize: 20,
   fontWeight: "bold",
