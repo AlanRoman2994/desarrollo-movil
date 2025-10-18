@@ -14,6 +14,8 @@ import Documentos from '../../screens/Documentos';
 import Proveedores from '../../screens/Proveedores';
 import Pedidos from '../../screens/Pedidos';
 import Unchecked_Stock from '../../screens/Unchecked_Stock';
+import Productos from '../../screens/Productos';
+import Home from '../../screens/Home';
 const Stack = createStackNavigator();
 
 function AppNavigator() {
@@ -37,6 +39,11 @@ function AppNavigator() {
               name="Home"
               component={TabNavigator}
               initialParams={{ userId: null }}
+            />
+            <Stack.Screen
+              name="Productos"
+              component={Productos}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="LowStockScreen"

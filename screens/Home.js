@@ -28,17 +28,15 @@ const COLORS = {
 };
 
 const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
-  <TouchableOpacity
+ <TouchableOpacity
     style={styles.dashboardButton}
-    onPress={() => {
-      if (targetScreen) navigation.navigate(targetScreen);
-      else console.log(`Acción presionada: ${title}`);
-    }}
+    onPress={() => navigation.getParent()?.navigate(targetScreen)}
   >
     <MaterialCommunityIcons name={iconName} size={40} color={COLORS.white} />
     <Text style={styles.dashboardText}>{title}</Text>
   </TouchableOpacity>
 );
+
 
 const Home = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
@@ -205,7 +203,6 @@ const Home = ({ navigation }) => {
     </View>
   );
 };
-
 export default Home;
 
 const styles = StyleSheet.create({

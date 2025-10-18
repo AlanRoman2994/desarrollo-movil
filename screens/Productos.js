@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   Platform,
   Modal,
@@ -15,7 +14,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAllProducts, fetchLowStockCount, fetchUncheckedCount, searchRealTime, deleteProduct } from "../src/utils/models"; // tu función CRUD
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -262,40 +261,45 @@ const Productos = ({ navigation }) => {
     }
   };
   const handleDeleteProduct = (productId) => {
+  Alert.alert(
+    "Confirmar eliminación",
+    "¿Deseas eliminar este producto?",
+    [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            if (!productId) return; // seguridad por si no hay producto
+            await deleteProduct(productId);
 
-    Alert.alert(
-      "Confirmar eliminación",
-      "¿Deseas eliminar este producto?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteProduct(productId);
-              setDeleteSearchText("");
-              setDeleteResults([]);
-              fetchProducts()
-              Alert.alert("✅ Producto eliminado");
-              setDeleteResults(deleteResults.filter(item => item.id !== productId));
-            } catch (error) {
-              console.error("Error eliminando producto:", error);
-              Alert.alert("Error", "No se pudo eliminar el producto");
-            }
-          },
+            // Limpiamos input y resultados
+            setDeleteSearchText("");
+            setDeleteResults([]);
+
+            // Recargamos productos
+            fetchProducts();
+
+            Alert.alert("✅ Producto eliminado");
+          } catch (error) {
+            console.error("Error eliminando producto:", error);
+            Alert.alert("Error", "No se pudo eliminar el producto");
+          }
         },
-      ]
-    );
-  }
+      },
+    ]
+  );
+};
+
 
 
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
+    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple,flex:1 }}>
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -307,8 +311,10 @@ const Productos = ({ navigation }) => {
 
       {/* SCROLL PRINCIPAL */}
       <ScrollView
+         style={{ flex: 1 }}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
@@ -496,7 +502,11 @@ const Productos = ({ navigation }) => {
 
             <TouchableOpacity
               style={{ backgroundColor: "#999", padding: 10, borderRadius: 8 }}
-              onPress={() => setDeleteModalVisible(false)}
+               onPress={() => {
+                              setDeleteModalVisible(false);   // cerrar modal
+                              setDeleteSearchText("");        // limpiar input
+                              setDeleteResults([]);           // limpiar resultados filtrados
+  }}
             >
               <Text style={{ color: "#fff", textAlign: "center" }}>Cancelar</Text>
             </TouchableOpacity>
@@ -504,6 +514,7 @@ const Productos = ({ navigation }) => {
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -511,26 +522,22 @@ export default Productos;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
+    flex:1,
     backgroundColor: COLORS.white,
   },
-  header: {
-  height: 60,
-  justifyContent: "center",
-  alignItems: "center",
-  backgroundColor: COLORS.headerPurple,
+
+header: {
+  height: 60, 
+  flexDirection: "row", 
+  alignItems: "center", // centra verticalmente todos los hijos
+  justifyContent: "space-between", // separa los elementos a los extremos
   paddingHorizontal: 20,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  backgroundColor: COLORS.headerPurple,
 },
 
-backButton: {
-  position: "absolute",
-  left: 20,
-  top: "50%",
-  transform: [{ translateY: -12 }], // ajusta según el tamaño del icono
-},
 
 headerTitle: {
+  flex: 1,
   color: COLORS.white,
   fontSize: 20,
   fontWeight: "bold",
@@ -700,16 +707,16 @@ headerTitle: {
     marginRight: 5,
   },
   bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around", // mantiene los botones distribuidos horizontalmente
-    alignItems: "flex-start", // alinea los botones arriba dentro de la barra
-    height: 100, // aumenta la altura de la barra
-    paddingHorizontal: 20,
-    paddingTop: 10, // espacio desde arriba de la barra
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.lightGray,
-  },
+  flexDirection: "row",
+  justifyContent: "space-around",
+  alignItems: "center",
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  backgroundColor: COLORS.white,
+  borderTopWidth: 1,
+  borderTopColor: COLORS.lightGray,
+},
+
   navItem: {
     alignItems: "center",
   },

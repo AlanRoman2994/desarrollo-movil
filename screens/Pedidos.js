@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { 
-  StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, 
+  StyleSheet, View, Text, TouchableOpacity, ScrollView,  StatusBar, 
   Platform, TextInput, Modal 
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 const COLORS = {
   headerPurple: "#7A5AAB",
   white: "#FFFFFF",
@@ -78,9 +78,9 @@ const Pedidos = ({ navigation }) => {
   };
 
   return (
+    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple,flex:1 }}>
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -94,7 +94,7 @@ const Pedidos = ({ navigation }) => {
 
       <View style={styles.searchBarContainer}>
         <View style={styles.searchBox}>
-          <MaterialCommunityIcons name="magnify" size={24} color={COLORS.gray} />
+          <MaterialCommunityIcons name="magnify" size={20} color={COLORS.gray} />
           <TextInput 
             style={styles.searchInput} 
             placeholder="Buscar productos..." 
@@ -164,16 +164,17 @@ const Pedidos = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: COLORS.white },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, paddingTop: Platform.OS === 'android' ? 10 : 0, backgroundColor: COLORS.headerPurple },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.white },
+  headerTitle: { marginTop:10,fontSize: 20, fontWeight: 'bold', color: COLORS.white },
   userIconText: { color: COLORS.headerPurple, fontWeight: 'bold', fontSize: 18 },
   searchBarContainer: { paddingHorizontal: 15, paddingBottom: 15, backgroundColor: COLORS.headerPurple },
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 25, paddingHorizontal: 15, height: 50 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 25, paddingHorizontal: 15, height: 38 },
   searchInput: { flex: 1, fontSize: 16, color: COLORS.black },
   scrollContainer: { padding: 20, paddingBottom: 100 },
   missingProductsCard: { backgroundColor: COLORS.white, borderRadius: 12, padding: 15, borderWidth: 2, borderColor: COLORS.lightPurpleBorder, marginBottom: 20 },
