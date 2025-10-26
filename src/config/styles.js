@@ -56,8 +56,8 @@ export const COLORS = {
   greenButton: "#28A745",
   accentPurple: "#9B59B6",
   secondaryBlue: "#4A90E2",
-  white: "#FFFFFF",
-  gray: "#F5F5F5",
+  white: "#ffffffff",
+  gray: "#f5f5f5a4",
   black: "#000000",
   headerPurple: "#7F40BF",
 

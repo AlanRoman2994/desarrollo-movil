@@ -177,7 +177,7 @@ const Home = ({ navigation }) => {
       {!sidebarVisible && (
         <View style={styles.bottomNav}>
           <TouchableOpacity style={styles.navItem} onPress={toggleSidebar}>
-            <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
+            <MaterialCommunityIcons name="menu" size={24} color={COLORS.accentPurple} />
             <Text style={styles.navTextInactive}>Menú</Text>
           </TouchableOpacity>
         </View>
@@ -188,7 +188,7 @@ const Home = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={closeSidebar}>
           <View style={styles.overlay}>
             <Animated.View style={[styles.sidebar, { left: sidebarAnim }]}>
-              <Menu closeSidebar={closeSidebar} />
+              <Menu closeSidebar={closeSidebar} navigation={navigation}/>
             </Animated.View>
           </View>
         </TouchableWithoutFeedback>

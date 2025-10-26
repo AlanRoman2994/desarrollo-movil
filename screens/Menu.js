@@ -2,9 +2,8 @@ import React from 'react';
 import { Platform, StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusBar, Dimensions, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { auth } from '../src/config/firebaseConfig';
 
-import { signOut } from 'firebase/auth';
+import { signOut,getAuth } from 'firebase/auth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,6 +44,7 @@ const Sidebar = ({ navigation }) => {
   };
 
   const handleLogout = () => {
+    const auth = getAuth();
     signOut(auth)
       .then(() => {
         navigation.replace("Login"); // Redirige a pantalla de login
