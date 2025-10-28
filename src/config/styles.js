@@ -153,10 +153,12 @@ export const loginStyle = StyleSheet.create({
   },
 
   logo: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
-  },
+  width: 150,
+  height: 150,
+  resizeMode: "cover",
+  borderRadius: 30, // Redondea las esquinas
+  opacity: 0.5,     // 0.0 totalmente transparente, 1.0 totalmente opaco
+},
 
   label: {
     color: "#fff",

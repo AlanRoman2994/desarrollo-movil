@@ -73,7 +73,7 @@ export default function LoginScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoContainer}>
-            <Image source={require('../assets/logo_andino.png')} style={styles.logo} />
+            <Image source={require('../assets/copy.png')} style={styles.logo} />
           </View>
 
           <Text style={styles.label}>Usuario o Correo Electrónico</Text>

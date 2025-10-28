@@ -30,30 +30,13 @@ function AppNavigator() {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen
-              name="Home"
-              component={TabNavigator}
-              initialParams={{ userId: null }}
-            />
-            <Stack.Screen
-              name="Productos"
-              component={Productos}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Home" component={TabNavigator} initialParams={{ userId: null }} />
+            <Stack.Screen name="LowStockScreen" component={LowStockScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Productos" component={Productos} options={{ headerShown: false }}/>
             <Stack.Screen 
               name="PerfilScreen" 
               component={PerfilScreen} 
               options={{ headerShown: false }}  
-            />
-            <Stack.Screen
-              name="PerfilScreean"
-              component={PerfilScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="LowStockScreen"
-              component={LowStockScreen}
-              options={{ headerShown: false }}
             />
             <Stack.Screen name="Acercadenosotro" component={Acercadenosotro} />
             <Stack.Screen name="Pedidos" component={Pedidos} />

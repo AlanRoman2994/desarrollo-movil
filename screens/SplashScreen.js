@@ -16,11 +16,11 @@ const SplashScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image 
-        source={require('../assets/logo_andino.png')} 
+        source={require('../assets/copy.png')} 
         style={styles.logo} 
       />
-      <Text style={styles.appName}>ANDINO</Text>
-      <Text style={styles.appSubtitle}>LOGISTICA</Text>
+      <Text style={styles.appName}>Libreria</Text>
+      <Text style={styles.appSubtitle}>Salta</Text>
     </View>
   );
 };

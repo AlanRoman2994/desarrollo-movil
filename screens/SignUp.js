@@ -125,7 +125,7 @@ try {
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.text }}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.logoContainer}>
-          <Image source={require("../assets/logo_andino.png")} style={styles.logo} />
+          <Image source={require("../assets/copy.png")} style={styles.logo} />
         </View>
 
         <Text style={styles.title}>Crear Cuenta</Text>
