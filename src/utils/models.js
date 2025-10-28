@@ -5,7 +5,8 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { Alert } from "react-native";
- async function getAllProducts(limitCount = 10, startAfterDoc = null) {
+
+async function getAllProducts(limitCount = 10, startAfterDoc = null) {
   try {
     let q;
     const productsRef = collection(db, "products");
