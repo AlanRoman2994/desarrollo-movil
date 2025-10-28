@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   Platform,
   Modal,
@@ -15,7 +14,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAllProducts, fetchLowStockCount, fetchUncheckedCount, searchRealTime, deleteProduct } from "../src/utils/models"; // tu función CRUD
-
+import { SafeAreaView } from "react-native-safe-area-context";
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -293,9 +292,11 @@ const Productos = ({ navigation }) => {
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
+    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple, flex: 1}}>
+
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-      <SafeAreaView style={{ backgroundColor: COLORS.headerPurple }} />
+    
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -504,6 +505,8 @@ const Productos = ({ navigation }) => {
         </KeyboardAvoidingView>
       </Modal>
     </View>
+    </SafeAreaView>
+
   );
 }
 
@@ -511,24 +514,22 @@ export default Productos;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
     backgroundColor: COLORS.white,
   },
   header: {
-  height: 60,
   justifyContent: "center",
   alignItems: "center",
   backgroundColor: COLORS.headerPurple,
   paddingHorizontal: 20,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 15,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 10: 20,
 },
 
 backButton: {
   position: "absolute",
   left: 20,
-  top: "50%",
-  transform: [{ translateY: -12 }], // ajusta según el tamaño del icono
+  top: Platform.OS === "android" ? StatusBar.currentHeight + 10 : 20,
 },
+
 
 headerTitle: {
   color: COLORS.white,
@@ -703,7 +704,7 @@ headerTitle: {
     flexDirection: "row",
     justifyContent: "space-around", // mantiene los botones distribuidos horizontalmente
     alignItems: "flex-start", // alinea los botones arriba dentro de la barra
-    height: 100, // aumenta la altura de la barra
+    height: 10,// aumenta la altura de la barra
     paddingHorizontal: 20,
     paddingTop: 10, // espacio desde arriba de la barra
     backgroundColor: COLORS.white,

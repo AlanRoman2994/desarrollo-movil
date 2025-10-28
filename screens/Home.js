@@ -197,7 +197,7 @@ const Home = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={closeSidebar}>
           <View style={styles.overlay}>
             <Animated.View style={[styles.sidebar, { left: sidebarAnim }]}>
-              <Menu closeSidebar={closeSidebar} />
+            <Menu navigation={navigation} closeSidebar={closeSidebar} />
             </Animated.View>
           </View>
         </TouchableWithoutFeedback>

@@ -14,43 +14,27 @@ import Documentos from '../../screens/Documentos';
 import Proveedores from '../../screens/Proveedores';
 import Pedidos from '../../screens/Pedidos';
 import Unchecked_Stock from '../../screens/Unchecked_Stock';
+import PerfilScreen from "../../screens/PerfilScreen";
+
 const Stack = createStackNavigator();
 
 function AppNavigator() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar
-          translucent
-          backgroundColor="transparent"
-          barStyle="dark-content"
-        />
+        <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
         <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{ headerShown: false }}
-            initialRouteName="Splash"
-          >
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen
-              name="Home"
-              component={TabNavigator}
-              initialParams={{ userId: null }}
-            />
-            <Stack.Screen
-              name="LowStockScreen"
-              component={LowStockScreen}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Home" component={TabNavigator} initialParams={{ userId: null }} />
+            <Stack.Screen name="PerfilScreen" component={PerfilScreen} /> 
+            <Stack.Screen name="LowStockScreen" component={LowStockScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Pedidos" component={Pedidos} />
             <Stack.Screen name="Proveedores" component={Proveedores} />
             <Stack.Screen name="Documentos" component={Documentos} />
-            <Stack.Screen
-              name="Unchecked_Stock"
-              component={Unchecked_Stock}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Unchecked_Stock" component={Unchecked_Stock} options={{ headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
