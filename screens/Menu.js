@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { signOut,getAuth } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
-import { signOut } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 
 

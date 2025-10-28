@@ -14,11 +14,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getAllProducts, fetchLowStockCount, fetchUncheckedCount, searchRealTime, deleteProduct } from "../src/utils/models"; // tu función CRUD
-<<<<<<< HEAD
 import { SafeAreaView } from "react-native-safe-area-context";
-=======
-import { SafeAreaView } from 'react-native-safe-area-context';
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
 const COLORS = {
   primaryPurple: "#5A3D8A",
   headerPurple: "#7A5AAB",
@@ -301,17 +297,9 @@ const Productos = ({ navigation }) => {
   const handlePress = (action) => console.log(`Acción presionada: ${action}`);
 
   return (
-<<<<<<< HEAD
-    <SafeAreaView style={{ backgroundColor: COLORS.headerPurple, flex: 1}}>
-
-    <View style={styles.mainContainer}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-    
-=======
     <SafeAreaView style={{ backgroundColor: COLORS.headerPurple,flex:1 }}>
     <View style={styles.mainContainer}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -527,10 +515,6 @@ const Productos = ({ navigation }) => {
       </Modal>
     </View>
     </SafeAreaView>
-<<<<<<< HEAD
-
-=======
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
   );
 }
 
@@ -538,23 +522,6 @@ export default Productos;
 
 const styles = StyleSheet.create({
   mainContainer: {
-<<<<<<< HEAD
-    backgroundColor: COLORS.white,
-  },
-  header: {
-  justifyContent: "center",
-  alignItems: "center",
-  backgroundColor: COLORS.headerPurple,
-  paddingHorizontal: 20,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 10: 20,
-},
-
-backButton: {
-  position: "absolute",
-  left: 20,
-  top: Platform.OS === "android" ? StatusBar.currentHeight + 10 : 20,
-},
-=======
     flex:1,
     backgroundColor: COLORS.white,
   },
@@ -568,7 +535,6 @@ header: {
   backgroundColor: COLORS.headerPurple,
 },
 
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
 
 
 headerTitle: {
@@ -742,18 +708,6 @@ headerTitle: {
     marginRight: 5,
   },
   bottomNav: {
-<<<<<<< HEAD
-    flexDirection: "row",
-    justifyContent: "space-around", // mantiene los botones distribuidos horizontalmente
-    alignItems: "flex-start", // alinea los botones arriba dentro de la barra
-    height: 10,// aumenta la altura de la barra
-    paddingHorizontal: 20,
-    paddingTop: 10, // espacio desde arriba de la barra
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.lightGray,
-  },
-=======
   flexDirection: "row",
   justifyContent: "space-around",
   alignItems: "center",
@@ -764,7 +718,6 @@ headerTitle: {
   borderTopColor: COLORS.lightGray,
 },
 
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
   navItem: {
     alignItems: "center",
   },

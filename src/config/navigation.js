@@ -14,13 +14,10 @@ import Documentos from '../../screens/Documentos';
 import Proveedores from '../../screens/Proveedores';
 import Pedidos from '../../screens/Pedidos';
 import Unchecked_Stock from '../../screens/Unchecked_Stock';
-<<<<<<< HEAD
 import PerfilScreen from "../../screens/PerfilScreen";
 
-=======
 import Productos from '../../screens/Productos';
 import Home from '../../screens/Home';
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
 const Stack = createStackNavigator();
 
 function AppNavigator() {
@@ -33,11 +30,6 @@ function AppNavigator() {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-<<<<<<< HEAD
-            <Stack.Screen name="Home" component={TabNavigator} initialParams={{ userId: null }} />
-            <Stack.Screen name="PerfilScreen" component={PerfilScreen} /> 
-            <Stack.Screen name="LowStockScreen" component={LowStockScreen} options={{ headerShown: false }} />
-=======
             <Stack.Screen
               name="Home"
               component={TabNavigator}
@@ -53,7 +45,6 @@ function AppNavigator() {
               component={LowStockScreen}
               options={{ headerShown: false }}
             />
->>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
             <Stack.Screen name="Pedidos" component={Pedidos} />
             <Stack.Screen name="Proveedores" component={Proveedores} />
             <Stack.Screen name="Documentos" component={Documentos} />
