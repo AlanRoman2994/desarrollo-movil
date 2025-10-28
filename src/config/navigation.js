@@ -8,28 +8,56 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import SplashScreen from '../../screens/SplashScreen';
 import LoginScreen from '../../screens/Login';
 import SignUpScreen from '../../screens/SignUp';
-import TabNavigator from '../../navigation/TabNavigator'; 
+import TabNavigator from '../../navigation/TabNavigator';
+import LowStockScreen from '../../screens/LowStockScreen';
+import Documentos from '../../screens/Documentos';
+import Proveedores from '../../screens/Proveedores';
+import Pedidos from '../../screens/Pedidos';
+import Unchecked_Stock from '../../screens/Unchecked_Stock';
+<<<<<<< HEAD
+import PerfilScreen from "../../screens/PerfilScreen";
 
+=======
+import Productos from '../../screens/Productos';
+import Home from '../../screens/Home';
+>>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
 const Stack = createStackNavigator();
 
 function AppNavigator() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
         <NavigationContainer>
-          <Stack.Navigator 
-            screenOptions={{ headerShown: false }}
-            initialRouteName="Splash"
-          >
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
-            <Stack.Screen 
-              name="Home" 
-              component={TabNavigator} 
-              initialParams={{ userId: null }} 
+<<<<<<< HEAD
+            <Stack.Screen name="Home" component={TabNavigator} initialParams={{ userId: null }} />
+            <Stack.Screen name="PerfilScreen" component={PerfilScreen} /> 
+            <Stack.Screen name="LowStockScreen" component={LowStockScreen} options={{ headerShown: false }} />
+=======
+            <Stack.Screen
+              name="Home"
+              component={TabNavigator}
+              initialParams={{ userId: null }}
             />
+            <Stack.Screen
+              name="Productos"
+              component={Productos}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="LowStockScreen"
+              component={LowStockScreen}
+              options={{ headerShown: false }}
+            />
+>>>>>>> c8e13ecad766124904c83df508ef9273d134ae9e
+            <Stack.Screen name="Pedidos" component={Pedidos} />
+            <Stack.Screen name="Proveedores" component={Proveedores} />
+            <Stack.Screen name="Documentos" component={Documentos} />
+            <Stack.Screen name="Unchecked_Stock" component={Unchecked_Stock} options={{ headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

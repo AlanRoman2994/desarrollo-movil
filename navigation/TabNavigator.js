@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
-import HomeStack from './HomeStack'; // <-- importamos el stack con Home + Productos
+import HomeStack from './HomeStack'; // Stack con Home + Productos
 
 const Tab = createBottomTabNavigator();
 
@@ -24,7 +24,15 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Inicio" component={HomeStack} options={{ tabBarLabel: 'Inicio' }} />
+      {/* Pantalla Inicio sin barra inferior */}
+      <Tab.Screen
+        name="Inicio"
+        component={HomeStack}
+        options={{
+          tabBarLabel: 'Inicio',
+          tabBarStyle: { display: 'none' }, // 👈 oculta la barra inferior
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -40,3 +48,5 @@ const styles = StyleSheet.create({
 });
 
 export default TabNavigator;
+
+
