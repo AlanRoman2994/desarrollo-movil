@@ -15,6 +15,7 @@ import Proveedores from '../../screens/Proveedores';
 import Pedidos from '../../screens/Pedidos';
 import Unchecked_Stock from '../../screens/Unchecked_Stock';
 import PerfilScreen from "../../screens/PerfilScreen";
+import Acercadenosotro from '../../screens/Acercadenosotro';
 import Productos from '../../screens/Productos';
 import Home from '../../screens/Home';
 const Stack = createStackNavigator();
@@ -33,6 +34,17 @@ function AppNavigator() {
             <Stack.Screen name="PerfilScreen" component={PerfilScreen} /> 
             <Stack.Screen name="LowStockScreen" component={LowStockScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Productos" component={Productos} options={{ headerShown: false }}/>
+            <Stack.Screen 
+              name="PerfilScreen" 
+              component={PerfilScreen} 
+              options={{ headerShown: false }}  
+            />
+            <Stack.Screen
+              name="LowStockScreen"
+              component={LowStockScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="Acercadenosotro" component={Acercadenosotro} />
             <Stack.Screen name="Pedidos" component={Pedidos} />
             <Stack.Screen name="Proveedores" component={Proveedores} />
             <Stack.Screen name="Documentos" component={Documentos} />

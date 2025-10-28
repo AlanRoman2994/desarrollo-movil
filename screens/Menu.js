@@ -108,7 +108,7 @@ const Sidebar = ({}) => {
 
           <Text style={styles.sectionTitle}>LEGAL</Text>
           <MenuItem icon="file-document-outline" text="Términos y Condiciones" onPress={() => navigation.navigate('Terminos')} />
-          <MenuItem icon="shield-outline" text="Política de Privacidad" onPress={() => navigation.navigate('Privacidad')} />
+          <MenuItem icon="information-outline" text="Acerca de nosotros" onPress={() => navigation.navigate('Acercadenosotro')} />
 
           {/* BOTÓN CERRAR SESIÓN */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
