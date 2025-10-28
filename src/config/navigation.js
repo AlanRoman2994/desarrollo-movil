@@ -41,6 +41,11 @@ function AppNavigator() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="PerfilScreean"
+              component={PerfilScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="LowStockScreen"
               component={LowStockScreen}
               options={{ headerShown: false }}

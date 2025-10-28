@@ -11,17 +11,20 @@ import {
   TouchableWithoutFeedback,
   Platform,
   useWindowDimensions,
+  ImageBackground,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../src/config/firebaseConfig";
 import Menu from "../screens/Menu";
-import { COLORS , homeStyle as styles} from "../src/config/styles";
+import { COLORS, homeStyle as styles } from "../src/config/styles";
 
+// 👉 Importamos la imagen de fondo
+import fondo from "../assets/home.png";
 
 const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
- <TouchableOpacity
+  <TouchableOpacity
     style={styles.dashboardButton}
     onPress={() => navigation.getParent()?.navigate(targetScreen)}
   >
@@ -30,10 +33,9 @@ const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
   </TouchableOpacity>
 );
 
-
 const Home = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
-  const isMobile = width < 600; // definición de móvil
+  const isMobile = width < 600;
   const [userProfileLetter, setUserProfileLetter] = useState("");
   const [userName, setUserName] = useState("");
   const [syncTime] = useState("12:30hs");
@@ -94,8 +96,7 @@ const Home = ({ navigation }) => {
             styles.header,
             { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 10 },
           ]}
-      >
-
+        >
           <View style={styles.profileLetterContainer}>
             <Text style={styles.profileText}>{userProfileLetter}</Text>
           </View>
@@ -124,54 +125,60 @@ const Home = ({ navigation }) => {
         </View>
       </SafeAreaView>
 
-      {/* GRILLA CENTRAL */}
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContainerCentered,
-          { paddingTop: height * 0.05 }, // padding proporcional
-        ]}
-        showsVerticalScrollIndicator={false}
+      {/* SCROLL CON IMAGEN DE FONDO */}
+      <ImageBackground
+        source={fondo}
+       style={{ flex: 1, width: '100%', height: '90%' }}
+        resizeMode="stretch"
       >
-        <View
-          style={[
-            styles.gridWrapper,
-            {
-              flexDirection: isMobile ? "column" : "row",
-              maxWidth: isMobile ? "100%" : 600,
-            },
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContainerCentered,
+            { paddingTop: height * 0.05 },
           ]}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.gridColumn, { marginRight: isMobile ? 0 : 10 }]}>
-            <DashboardButton
-              title="Productos"
-              iconName="package-variant"
-              navigation={navigation}
-              targetScreen="Productos"
-            />
-            <DashboardButton
-              title="Proveedores"
-              iconName="account-multiple"
-              navigation={navigation}
-              targetScreen="Proveedores"
-            />
-          </View>
+          <View
+            style={[
+              styles.gridWrapper,
+              {
+                flexDirection: isMobile ? "column" : "row",
+                maxWidth: isMobile ? "100%" : 600,
+              },
+            ]}
+          >
+            <View style={[styles.gridColumn, { marginRight: isMobile ? 0 : 10 }]}>
+              <DashboardButton
+                title="Productos"
+                iconName="package-variant"
+                navigation={navigation}
+                targetScreen="Productos"
+              />
+              <DashboardButton
+                title="Proveedores"
+                iconName="account-multiple"
+                navigation={navigation}
+                targetScreen="Proveedores"
+              />
+            </View>
 
-          <View style={[styles.gridColumn, { marginRight: 0 }]}>
-            <DashboardButton
-              title="Pedidos"
-              iconName="cart-outline"
-              navigation={navigation}
-              targetScreen="Pedidos"
-            />
-            <DashboardButton
-              title="Documentos"
-              iconName="file-document-outline"
-              navigation={navigation}
-              targetScreen="Documentos"
-            />
+            <View style={[styles.gridColumn, { marginRight: 0 }]}>
+              <DashboardButton
+                title="Pedidos"
+                iconName="cart-outline"
+                navigation={navigation}
+                targetScreen="Pedidos"
+              />
+              <DashboardButton
+                title="Documentos"
+                iconName="file-document-outline"
+                navigation={navigation}
+                targetScreen="Documentos"
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </ImageBackground>
 
       {/* MENÚ INFERIOR */}
       {!sidebarVisible && (
@@ -188,7 +195,7 @@ const Home = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={closeSidebar}>
           <View style={styles.overlay}>
             <Animated.View style={[styles.sidebar, { left: sidebarAnim }]}>
-              <Menu closeSidebar={closeSidebar} navigation={navigation}/>
+              <Menu closeSidebar={closeSidebar} navigation={navigation} />
             </Animated.View>
           </View>
         </TouchableWithoutFeedback>
@@ -196,6 +203,5 @@ const Home = ({ navigation }) => {
     </View>
   );
 };
+
 export default Home;
-
-

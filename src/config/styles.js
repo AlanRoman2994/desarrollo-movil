@@ -119,133 +119,166 @@ export const documentStyle={
   },
 }
 
-export const loginStyle={
-  container: {
+export const loginStyle = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+
+  containerBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  overlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "rgba(0, 0, 0, 0.45)",
+  pointerEvents: "none", // 👈 Esto permite que los clics pasen a los elementos debajo
+},
+
+  scrollContainer: {
     flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 30,
-    paddingTop: 50,
-    backgroundColor: COLORS.primary, 
-    alignItems: 'center',
+    paddingVertical: 20,
+    width: "100%",
+    zIndex: 2,
   },
+
   logoContainer: {
-    marginBottom: 50,
-    alignItems: 'center',
+    marginBottom: 40,
+    alignItems: "center",
   },
+
   logo: {
     width: 150,
     height: 150,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
+
   label: {
-    color: COLORS.text,
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
-    alignSelf: 'flex-start',
-    width: '100%',
+    alignSelf: "flex-start",
+    width: "100%",
   },
+
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // Nuevo fondo para suavizar el contraste
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
     marginBottom: 20,
     paddingHorizontal: 15,
-    width: '100%',
+    width: "100%",
     height: 50,
-    // Borde suave para definir el cuadro sin que sea tosco
-    borderWidth: 1, 
-    borderColor: 'rgba(255, 255, 255, 0.4)', 
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
+
   input: {
     flex: 1,
-    height: '100%',
-    color: '#000',
+    height: "100%",
+    color: "#000",
     fontSize: 16,
   },
+
   iconButton: {
-      padding: 5,
-      marginLeft: 10,
+    padding: 5,
+    marginLeft: 10,
   },
+
   forgotText: {
     marginTop: 5,
-    color: COLORS.text, 
+    color: "#fff",
     fontSize: 14,
-    textDecorationLine: 'none',
-    alignSelf: 'flex-start',
-    marginBottom: 30,
+    textDecorationLine: "none",
+    alignSelf: "flex-start",
+    marginBottom: 25,
   },
+
   buttonPrimary: {
-    backgroundColor: COLORS.secondary, 
+    backgroundColor: "#f5f5f5a4",
     paddingVertical: 14,
     borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 20,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 25,
   },
+
   buttonText: {
-    color: COLORS.text, 
+    color: "#RRGGBBAA",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    padding:5
   },
+
   socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     marginBottom: 40,
   },
+
   buttonGoogle: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // Fondo más suave y texto púrpura para Google
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     paddingVertical: 12,
     borderRadius: 8,
     marginRight: 10,
     height: 50,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: "rgba(255, 255, 255, 0.4)",
   },
+
   buttonFacebook: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.secondary,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1877F2",
     paddingVertical: 12,
     borderRadius: 8,
     marginLeft: 10,
     height: 50,
   },
-  socialButtonTextGoogle: { // Estilo específico para Google (texto oscuro)
-    color: COLORS.secondary, 
+
+  socialButtonTextGoogle: {
+    color: "#000",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-  socialButtonTextFacebook: { // Estilo específico para Facebook (texto claro)
-    color: COLORS.text, 
+
+  socialButtonTextFacebook: {
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
+
   signUpLink: {
     marginTop: 10,
   },
-  signUpText: {
-    color: COLORS.text,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  signUpLinkText: {
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
-  // Se elimina el estilo footerText ya que el elemento se eliminó del renderizado.
-}
 
-export const homeStyle={
+  signUpText: {
+    color: "#fff",
+    fontSize: 15,
+    textAlign: "center",
+  },
+
+  signUpLinkText: {
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+  },
+});
+
+export const homeStyle = {
   mainContainer: { flex: 1, backgroundColor: COLORS.white },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 10 },
   backButton: { marginRight: 10 },
@@ -269,29 +302,34 @@ export const homeStyle={
   syncText: { color: COLORS.white, fontSize: 12 },
   syncTimeText: { color: COLORS.white, marginLeft: 4 },
 
+  // 🔹 Scroll con imagen de fondo
   scrollContainerCentered: {
-    marginTop:50,
-    padding: 20,
     flexGrow: 1,
     justifyContent: "flex-start",
     alignItems: "center",
+    padding: 20,
   },
+
   gridWrapper: {
     justifyContent: "space-between",
     width: "100%",
+    alignItems: "center",
   },
   gridColumn: {
     flex: 1,
     marginBottom: 15,
+    width: "100%",
   },
-  dashboardButton: {
-    backgroundColor: COLORS.primaryPurple,
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
+ dashboardButton: {
+  backgroundColor: 'rgba(106, 13, 173, 0.9)', // 0.7 = 70% opaco
+  borderRadius: 12,
+  padding: 20,
+  marginBottom: 15,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
   dashboardText: { color: COLORS.white, fontSize: 16, marginTop: 10, fontWeight: "bold" },
 
   bottomNav: {
@@ -330,4 +368,11 @@ export const homeStyle={
     shadowOffset: { width: 2, height: 0 },
     elevation: 8,
   },
-}
+
+  // 🔹 Overlay dentro del scroll para que el contenido resalte
+  scrollOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    zIndex: 1,
+  },
+};
