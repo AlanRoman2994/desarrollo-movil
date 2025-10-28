@@ -113,8 +113,8 @@ export default function LoginScreen({ navigation }) {
             <FontAwesome5 name={showPassword ? "eye-slash" : "eye"} size={20} color="#888" />
           </TouchableOpacity>
           {/* Lupa/Zoom (Placeholder funcionalmente) */}
-          <TouchableOpacity onPress={() => Alert.alert("Zoom", "Función de zoom/lupa.")} style={styles.iconButton}>
-            <FontAwesome5 name={"search-plus"} size={20} color="#888" />
+          <TouchableOpacity onPress={() => ("biometria", "Desbloqueo con huella o FaceId.")} style={styles.iconbutton}>
+            <FontAwesome5 name="fingerprint" size={20} color="#888" />
           </TouchableOpacity>
         </View>
 
