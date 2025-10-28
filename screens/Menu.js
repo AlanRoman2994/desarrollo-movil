@@ -3,8 +3,9 @@ import { Platform, StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusB
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth } from '../src/config/firebaseConfig';
-
 import { signOut } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -36,13 +37,10 @@ const MenuItem = ({ icon, text, onPress, showArrow = true, badge = null, isNew =
   </TouchableOpacity>
 );
 
-const Sidebar = ({ navigation }) => {
+const Sidebar = ({}) => {
+  const navigation =useNavigation();
   const userProfileLetter = 'A';
   const userName = 'Alan';
-
-  const handlePress = (item) => {
-    console.log(`Navegar a: ${item}`);
-  };
 
   const handleLogout = () => {
     signOut(auth)
@@ -96,20 +94,20 @@ const Sidebar = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.sectionTitle}>SECCIONES PRINCIPALES</Text>
-          <MenuItem icon="view-dashboard-outline" text="Panel de control" onPress={() => handlePress('Panel de control')} />
-          <MenuItem icon="package-variant-closed" text="Envíos" onPress={() => handlePress('Envíos')} />
-          <MenuItem icon="map-marker-path" text="Rutas" onPress={() => handlePress('Rutas')} />
+          <MenuItem icon="view-dashboard-outline" text="Panel de control" onPress={() => navigation.navigate('Home')} />
+          <MenuItem icon="package-variant-closed" text="Envíos" onPress={() => navigation.navigate('Pedidos')} />
+          <MenuItem icon="map-marker-path" text="Rutas" onPress={() => navigation.navigate('Unchecked_Stock')} />
 
           <Text style={styles.sectionTitle}>MÁS OPCIONES</Text>
-          <MenuItem icon="bell-outline" text="Notificaciones" onPress={() => handlePress('Notificaciones')} badge="4" />
-          <MenuItem icon="history" text="Historial" onPress={() => handlePress('Historial')} />
-          <MenuItem icon="account-outline" text="Perfil" onPress={() => handlePress('Perfil')} />
-          <MenuItem icon="cog-outline" text="Configuración" onPress={() => handlePress('Configuración')} />
-          <MenuItem icon="lifebuoy" text="Centro de Ayuda" onPress={() => handlePress('Centro de Ayuda')} isNew />
+          <MenuItem icon="bell-outline" text="Notificaciones" onPress={() => navigation.navigate('Notificaciones')} badge="4" />
+          <MenuItem icon="history" text="Historial" onPress={() => navigation.navigate('Historial')} />
+          <MenuItem icon="account-outline" text="Perfil" onPress={() => navigation.navigate('PerfilScreen')} />
+          <MenuItem icon="cog-outline" text="Configuración" onPress={() => navigation.navigate('Configuración')} />
+          <MenuItem icon="lifebuoy" text="Centro de Ayuda" onPress={() => navigation.navigate('CentroDeAyuda')} isNew />
 
           <Text style={styles.sectionTitle}>LEGAL</Text>
-          <MenuItem icon="file-document-outline" text="Términos y Condiciones" onPress={() => handlePress('Términos y Condiciones')} />
-          <MenuItem icon="shield-outline" text="Política de Privacidad" onPress={() => handlePress('Política de Privacidad')} />
+          <MenuItem icon="file-document-outline" text="Términos y Condiciones" onPress={() => navigation.navigate('Terminos')} />
+          <MenuItem icon="shield-outline" text="Política de Privacidad" onPress={() => navigation.navigate('Privacidad')} />
 
           {/* BOTÓN CERRAR SESIÓN */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -119,11 +117,11 @@ const Sidebar = ({ navigation }) => {
 
         {/* Barra inferior */}
         <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem} onPress={() => handlePress('Home')}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
             <MaterialCommunityIcons name="home-outline" size={24} color={COLORS.primaryPurple} />
             <Text style={styles.navTextActive}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem} onPress={() => handlePress('Mas')}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Mas')}>
             <MaterialCommunityIcons name="menu" size={24} color={COLORS.gray} />
             <Text style={styles.navTextInactive}>Más</Text>
           </TouchableOpacity>
@@ -181,4 +179,5 @@ const styles = StyleSheet.create({
   navTextInactive: { color: COLORS.gray, fontSize: width * 0.03, marginTop: 2 },
   bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderColor: COLORS.lightGray, paddingVertical: height * 0.02, backgroundColor: COLORS.white, zIndex: 20 }
 });
+
 
