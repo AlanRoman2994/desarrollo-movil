@@ -63,7 +63,7 @@ export const COLORS = {
 
   primary: '#6A1B9A', // Púrpura Oscuro
   secondary: '#4A148C', // Púrpura más oscuro para el botón
-  text: '#FFFFFF',
+  text: '#000000FF',
   textSecondary: '#D0D0D0',
   inputBackground: '#FFFFFF', // Lo usaremos como base, pero cambiaremos la opacidad/color en los estilos
   googleRed: '#DB4437',

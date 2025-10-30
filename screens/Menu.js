@@ -1,12 +1,22 @@
+// =================== IMPORTS ===================
 import React from 'react';
-import { Platform, StyleSheet, View, Text, TouchableOpacity, ScrollView, StatusBar, Dimensions, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+  Dimensions,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { signOut,getAuth } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { auth } from '../src/config/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 
-
+// =================== CONSTANTES ===================
 const { width, height } = Dimensions.get('window');
 
 const COLORS = {
@@ -19,6 +29,7 @@ const COLORS = {
   red: '#E53935',
 };
 
+// =================== COMPONENTES ===================
 const MenuItem = ({ icon, text, onPress, showArrow = true, badge = null, isNew = false }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
     <MaterialCommunityIcons name={icon} size={24} color={COLORS.black} />
@@ -37,27 +48,34 @@ const MenuItem = ({ icon, text, onPress, showArrow = true, badge = null, isNew =
   </TouchableOpacity>
 );
 
-const Sidebar = ({}) => {
-  const navigation =useNavigation();
-  const userProfileLetter = 'A';
-  const userName = 'Alan';
+const Sidebar = () => {
+  const navigation = useNavigation();
+  const user = auth.currentUser;
+
+  const userName = user?.displayName || 'Usuario';
+  const userProfileLetter = userName.charAt(0).toUpperCase();
+  const isActive = user?.emailVerified;
+  const lastSync = user?.metadata?.lastSignInTime
+    ? new Date(user.metadata.lastSignInTime).toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '—';
 
   const handleLogout = () => {
-    const auth = getAuth();
     signOut(auth)
       .then(() => {
-        navigation.replace("Login"); // Redirige a pantalla de login
+        navigation.replace('Login');
       })
       .catch((error) => {
-        console.log("Error al cerrar sesión:", error);
-        Alert.alert("Error", "No se pudo cerrar sesión");
+        console.log('Error al cerrar sesión:', error);
+        Alert.alert('Error', 'No se pudo cerrar sesión');
       });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.headerPurple} />
-
       <View style={styles.mainContainer}>
         {/* Encabezado */}
         <View style={styles.header}>
@@ -71,9 +89,11 @@ const Sidebar = ({}) => {
             </View>
             <View style={styles.userInfo}>
               <View style={styles.accountStatus}>
-                <Text style={styles.accountStatusText}>Cuenta Activa</Text>
+                <Text style={styles.accountStatusText}>
+                  {isActive ? 'Cuenta Activa' : 'Cuenta no verificada'}
+                </Text>
                 <MaterialCommunityIcons
-                  name="check-circle"
+                  name={isActive ? 'check-circle' : 'alert-circle'}
                   size={16}
                   color={COLORS.white}
                   style={{ marginLeft: 5 }}
@@ -83,17 +103,14 @@ const Sidebar = ({}) => {
                 Bienvenido <Text style={styles.userName}>{userName}</Text>
               </Text>
               <Text style={styles.lastSyncText}>
-                Última sincronización <Text style={styles.lastSyncTime}>12:30hs</Text>
+                Última sincronización <Text style={styles.lastSyncTime}>{lastSync}</Text>
               </Text>
             </View>
           </View>
         </View>
 
         {/* Scroll principal */}
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>SECCIONES PRINCIPALES</Text>
           <MenuItem icon="view-dashboard-outline" text="Panel de control" onPress={() => navigation.navigate('Home')} />
           <MenuItem icon="package-variant-closed" text="Envíos" onPress={() => navigation.navigate('Pedidos')} />
@@ -169,16 +186,52 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: width * 0.03, color: COLORS.primaryPurple, fontWeight: 'bold', marginTop: height * 0.025, marginBottom: height * 0.01, textTransform: 'uppercase' },
   menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: height * 0.02, borderBottomWidth: 1, borderBottomColor: COLORS.lightGray },
   menuItemText: { flex: 1, fontSize: width * 0.04, marginLeft: width * 0.03, color: COLORS.black },
-  badgeContainer: { backgroundColor: COLORS.headerPurple, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  badgeContainer: {
+    backgroundColor: COLORS.headerPurple,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
   badgeText: { color: COLORS.white, fontSize: 12, fontWeight: 'bold' },
-  newTag: { backgroundColor: COLORS.headerPurple, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginRight: 10 },
+  newTag: {
+    backgroundColor: COLORS.headerPurple,
+    borderRadius: 5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 10,
+  },
   newTagText: { color: COLORS.white, fontSize: 10, fontWeight: 'bold' },
-  logoutButton: { marginTop: 30, paddingVertical: 12, paddingHorizontal: 15, backgroundColor: COLORS.red, borderRadius: 8, alignItems: 'center' },
+  logoutButton: {
+    marginTop: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.red,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
   logoutText: { color: COLORS.white, fontSize: width * 0.04, fontWeight: 'bold' },
   navItem: { alignItems: 'center', flex: 1 },
-  navTextActive: { color: COLORS.primaryPurple, fontSize: width * 0.03, fontWeight: '600', marginTop: 2 },
+  navTextActive: {
+    color: COLORS.primaryPurple,
+    fontSize: width * 0.03,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   navTextInactive: { color: COLORS.gray, fontSize: width * 0.03, marginTop: 2 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderColor: COLORS.lightGray, paddingVertical: height * 0.02, backgroundColor: COLORS.white, zIndex: 20 }
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderColor: COLORS.lightGray,
+    paddingVertical: height * 0.02,
+    backgroundColor: COLORS.white,
+    zIndex: 20,
+  },
 });
-
-
