@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ScrollView,
   SafeAreaView,
   ImageBackground,
-  StyleSheet,
 } from 'react-native';
 
 import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
@@ -23,20 +22,40 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
+  // Validación de email
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
+  // Validación de contraseña (mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número, 1 símbolo)
+  const validatePassword = (password) =>
+   /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password)
+
+  // Validación en tiempo real
+  useEffect(() => {
+    if (email.length === 0) {
+      setEmailError('');
+    } else if (!validateEmail(email)) {
+      setEmailError('Correo inválido');
+    } else {
+      setEmailError('');
+    }
+
+    if (password.length === 0) {
+      setPasswordError('');
+    } else if (!validatePassword(password)) {
+      setPasswordError('Credencial inválida, revise correo y contraseña');
+    } else {
+      setPasswordError('');
+    }
+
+    // Habilitar el botón solo si ambos son válidos
+    setIsButtonDisabled(!validateEmail(email) || !validatePassword(password));
+  }, [email, password]);
+
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Por favor ingrese su correo y contraseña.");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      Alert.alert("Error", "Ingrese un correo electrónico válido.");
-      return;
-    }
-
     try {
       const user = await signInWithEmailAndPassword(auth, email, password);
       const userId = user.user.uid;
@@ -46,7 +65,7 @@ export default function LoginScreen({ navigation }) {
       let errorMessage = "Hubo un problema al iniciar sesión.";
       switch (error.code) {
         case 'auth/invalid-credential':
-          errorMessage = "Correo o password incorrecto";
+          errorMessage = "Correo o contraseña incorrectos";
           break;
         case 'auth/invalid-email':
           errorMessage = "Email inexistente.";
@@ -65,7 +84,6 @@ export default function LoginScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground source={bg} style={styles.containerBackground} resizeMode="cover">
-        {/* Capa de oscurecimiento */}
         <View style={styles.overlay} />
 
         <ScrollView
@@ -88,6 +106,9 @@ export default function LoginScreen({ navigation }) {
               autoCapitalize="none"
             />
           </View>
+          {emailError.length > 0 && (
+            <Text style={{ color: 'red', marginBottom: 5 }}>{emailError}</Text>
+          )}
 
           <Text style={styles.label}>Contraseña</Text>
           <View style={styles.inputContainer}>
@@ -106,12 +127,19 @@ export default function LoginScreen({ navigation }) {
               <FontAwesome5 name={showPassword ? "eye-slash" : "eye"} size={20} color="#888" />
             </TouchableOpacity>
           </View>
+          {passwordError.length > 0 && (
+            <Text style={{ color: 'red', marginBottom: 5 }}>{passwordError}</Text>
+          )}
 
           <TouchableOpacity>
             <Text style={styles.forgotText}>Olvidé o bloqueé mi usuario y contraseña</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin}>
+          <TouchableOpacity
+            style={[styles.buttonPrimary, isButtonDisabled && { opacity: 0.5 }]}
+            onPress={handleLogin}
+            disabled={isButtonDisabled}
+          >
             <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
           </TouchableOpacity>
 

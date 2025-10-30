@@ -142,10 +142,16 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     alignItems: "center",
   },
+  signUpLink:{
+  alignItems:"center"
+  },
   logo: {
     width: 120,
     height: 120,
     resizeMode: "contain",
+  },
+  label:{
+    color:"white"
   },
   title: {
     color: COLORS.secondary,
@@ -153,6 +159,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 30,
   },
+  signUpText:{
+    color:"white"
+  },
+
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
