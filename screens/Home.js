@@ -14,13 +14,9 @@ import {
   ImageBackground,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../src/config/firebaseConfig";
+import { auth } from "../src/config/firebaseConfig";
 import Menu from "../screens/Menu";
 import { COLORS, homeStyle as styles } from "../src/config/styles";
-
-// 👉 Importamos la imagen de fondo
 import fondo from "../assets/home.png";
 
 const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
@@ -36,29 +32,19 @@ const DashboardButton = ({ title, iconName, navigation, targetScreen }) => (
 const Home = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
   const isMobile = width < 600;
-  const [userProfileLetter, setUserProfileLetter] = useState("");
-  const [userName, setUserName] = useState("");
-  const [syncTime] = useState("12:30hs");
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const sidebarAnim = useRef(new Animated.Value(-width * 0.75)).current;
 
-  const getUser = async () => {
-    const storedUserId = await AsyncStorage.getItem("userId");
-    if (storedUserId) {
-      const userRef = doc(db, "perfiles", storedUserId);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-      if (userData?.firstName) setUserName(userData.firstName);
-    }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    if (userName) setUserProfileLetter(userName[0]);
-  }, [userName]);
+  const user = auth.currentUser;
+  const userName = user?.displayName || "Usuario";
+  const userProfileLetter = userName.charAt(0).toUpperCase();
+  const isActive = user?.emailVerified;
+  const lastSync = user?.metadata?.lastSignInTime
+    ? new Date(user.metadata.lastSignInTime).toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
   const toggleSidebar = () => {
     if (sidebarVisible) {
@@ -103,9 +89,11 @@ const Home = ({ navigation }) => {
 
           <View style={styles.userInfo}>
             <View style={styles.statusRow}>
-              <Text style={styles.accountStatus}>Cuenta Activa</Text>
+              <Text style={styles.accountStatus}>
+                {isActive ? "Cuenta Activa" : "Cuenta no verificada"}
+              </Text>
               <MaterialCommunityIcons
-                name="check-circle"
+                name={isActive ? "check-circle" : "alert-circle"}
                 size={12}
                 color={COLORS.white}
                 style={{ marginLeft: 4 }}
@@ -119,7 +107,7 @@ const Home = ({ navigation }) => {
 
             <View style={styles.syncRow}>
               <Text style={styles.syncText}>Última sincronización</Text>
-              <Text style={styles.syncTimeText}>{syncTime}</Text>
+              <Text style={styles.syncTimeText}>{lastSync}</Text>
             </View>
           </View>
         </View>
@@ -128,7 +116,7 @@ const Home = ({ navigation }) => {
       {/* SCROLL CON IMAGEN DE FONDO */}
       <ImageBackground
         source={fondo}
-       style={{ flex: 1, width: '100%', height: '90%' }}
+        style={{ flex: 1, width: "100%", height: "90%" }}
         resizeMode="stretch"
       >
         <ScrollView
